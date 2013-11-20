@@ -1,0 +1,163 @@
+!!! 5
+html
+
+  head
+    meta(charset='utf-8')
+    title Assemblr
+    link(rel='stylesheet', href='//cdnjs.geta6.com/ajax/libs/twitter-bootstrap/3.0.0/css/bootstrap.min.css')
+    link(rel='stylesheet', href='//cdnjs.geta6.com/ajax/libs/mediaelement/2.11.3/css/mediaelementplayer.min.css')
+    link(rel='stylesheet', href='/media.css')
+
+  body
+    .ui-progress
+      .progress.progress-striped
+        .progress-bar
+
+    .ui-wrapper
+      #account.ui-section
+      #content.ui-section
+
+    #ui-dialog.ui-dialog.ui-dialog-opaque: table: tr: td
+      .ui-dialog-container
+        input.ui-dialog-keydriver
+        .ui-dialog-message: p
+        .ui-dialog-control
+          button.ui-dialog-button.btn.btn-sm.btn-default Cancel
+          button.ui-dialog-button.btn.btn-sm.btn-primary OK
+
+    #ui-config.ui-config.ui-config-opaque: table: tr: td
+
+    script#tmpl-account(type='text/template')
+      <% if (callback) { %>
+      .ui-dialog.ui-dialog-lock(style='visibility:visible;background-image:url(http://mogashi.no-ip.org/alice)')
+        table#auth: tr: td
+          form(method='POST', action='https://api.geta6.net/session/create')
+            h1 assemblr.
+            input(type='hidden', name='callback', value!='<%- callback %>')
+            .form-group
+              input.input-lg.form-control.username(type='text', name='username', placeholder='Username', autocomplete='off', autocorrect='off', autocapitalize='off')
+              input.input-lg.form-control.password(type='password', name='password', placeholder='Password', autocomplete='off', autocorrect='off', autocapitalize='off')
+            button.btn.btn-lg.btn-primary(type='submit') Log in
+      <% } else { %>
+      table#navi: tr
+        td.navi-head: a.js-navi-home(href='javascript:void(0)') assemblr.
+        td.navi.js-navi: a.js-navi-home(href='javascript:void(0)'): .glyphicon.glyphicon-home
+        td.navi.js-navi: a.js-navi-mail(href='javascript:void(0)'): .glyphicon.glyphicon-envelope
+        td.navi.js-navi: a.js-navi-help(href='javascript:void(0)'): .glyphicon.glyphicon-question-sign
+        td.navi.js-navi: a.js-navi-conf(href='javascript:void(0)'): .glyphicon.glyphicon-cog
+        td.navi.js-navi: a.js-navi-logout(href='javascript:void(0)'): .glyphicon.glyphicon-off
+        td.navi-form
+          form.js-navi-search(action='/search', method='get')
+            button.btn.btn-sm(type='submit'): .glyphicon.glyphicon-search
+            input.form-control.input-sm(type='text', placeholder='Search')
+      <% } %>
+
+    script#tmpl-contents(type='text/template')
+      table#item: tr
+        td.item-main
+        td.item-side
+          .item-side-container-dummy
+          .item-side-container
+            .item-stat
+              table
+                tr: th.item-side-entry STATUS
+                tr: td.item-side-entry.js-item-stat-at
+                  span At
+                  .pull-right.js-item-stat
+                tr: td.item-side-entry.js-item-stat-size
+                  span Size
+                  .pull-right.js-item-stat
+                tr: td.item-side-entry.js-item-stat-count
+                  span Count
+                  .pull-right.js-item-stat
+                tr: td.item-side-entry.js-item-stat-type
+                  span Type
+                  .pull-right.js-item-stat
+                tr: td.item-side-entry.js-item-stat-artist
+                  span Artist
+                  .pull-right.js-item-stat.item-stat-clickable
+                tr: td.item-side-entry.js-item-stat-series
+                  span Series
+                  .pull-right.js-item-stat.item-stat-clickable
+                tr: td.item-side-entry.js-item-stat-track
+                  span Track
+                  .pull-right.js-item-stat
+                tr: td.item-side-entry.js-item-stat-disk
+                  span Disk
+                  .pull-right.js-item-stat
+
+            .item-sort
+              table
+                tr: th.item-side-entry SORT ORDER
+                tr: td.item-side-entry.ui-selectbox
+                  .js-item-order-place
+                    .glyphicon.glyphicon-sort-by-order
+                    .pull-right Time Descend
+                  .ui-selectbox-candidate
+                    table
+                      tr: td.item-side-entry.js-item-order(data-order='+time')
+                        .glyphicon.glyphicon-sort-by-order
+                        .pull-right Time Ascend
+                      tr: td.item-side-entry.js-item-order(data-order='-time')
+                        .glyphicon.glyphicon-sort-by-order-alt
+                        .pull-right Time Descend
+                      tr: td.item-side-entry.js-item-order(data-order='+name')
+                        .glyphicon.glyphicon-sort-by-alphabet
+                        .pull-right Name Ascend
+                      tr: td.item-side-entry.js-item-order(data-order='-name')
+                        .glyphicon.glyphicon-sort-by-alphabet-alt
+                        .pull-right Name Descend
+
+            .item-user
+              table
+                tr: th.item-side-entry ACCOUNT
+                tr: td.item-side-entry
+                  .pull-left.item-user-icon.js-item-user-icon
+                  .pull-right.js-item-user.js-item-user-name
+
+          //- .item-play
+          //-   table
+          //-     tr: td.item-side-entry
+          //-       .pull-left.item-user-icon.js-item-user-icon
+          //-       .pull-right.js-item-user.js-item-user-name
+
+    script#tmpl-content(type='text/template')
+      .item-icon(style!='background-image:url(https://api.geta6.net/content/thumb?id=<%- id %>)')
+      .item-body
+        .item-body-header
+          span.item-body-header-title: a <%- details.title %>
+          .pull-right.item-body-header-series: a <%- details.series %>
+        .item-body-player
+        .item-body-footer
+
+    script#tmpl-player(type='text/template')
+      .item-icon(style!='background-image:url(https://api.geta6.net/content/thumb?id=<%- id %>)')
+      .item-body
+        .item-body-header
+          span.item-body-header-title: a <%- details.title %>
+          .pull-right.item-body-header-series: a <%- details.series %>
+        .item-body-player
+          <% if (type == '.mp4') { %>
+          video(controls='controls', preload='none')
+            source(type='video/mp4', src!='https://api.geta6.net/content/media?id=<%- id %>')
+            object(type='application/x-shockwave-flash', data='//cdnjs.geta6.com/ajax/libs/mediaelement/2.11.3/js/flashmediaelement.swf')
+              param(name='movie', value='flashmediaelement.swf')
+              param(name=flashvars, value='controls=true,file=https://api.geta6.net/content/media?id=<%- id %>')
+          <% } else if (type == '.mp3') { %>
+          audio(controls='controls', preload='none')
+            source(type='audio/mp3', src!='https://api.geta6.net/content/media?id=<%- id %>')
+            object(type='application/x-shockwave-flash', data='//cdnjs.geta6.com/ajax/libs/mediaelement/2.11.3/js/flashmediaelement.swf')
+              param(name='movie', value='flashmediaelement.swf')
+              param(name=flashvars, value='controls=true,file=https://api.geta6.net/content/media?id=<%- id %>')
+          <% } else if (type == '.pdf') { %>
+          img.image(src!='https://api.geta6.net/content/media?id=<%- id %>&page=1', data-src!='https://api.geta6.net/content/media?id=<%- id %>', data-page='1')
+          <% } %>
+        .item-body-footer
+
+    script(src='//cdnjs.geta6.com/ajax/libs/jquery/2.0.3/jquery.min.js')
+    script(src='//cdnjs.geta6.com/ajax/libs/underscore.js/1.5.2/underscore-min.js')
+    script(src='//cdnjs.geta6.com/ajax/libs/backbone.js/1.1.0/backbone-min.js')
+    script(src='//cdnjs.geta6.com/ajax/libs/moment.js/2.1.0/moment.min.js')
+    script(src='//cdnjs.geta6.com/ajax/libs/twitter-bootstrap/3.0.0/js/bootstrap.min.js')
+    script(src='//cdnjs.geta6.com/ajax/libs/mediaelement/2.11.3/js/mediaelement-and-player.min.js')
+    script(src='/media.js')

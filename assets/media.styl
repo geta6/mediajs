@@ -1,0 +1,456 @@
+@import 'nib'
+
+@keyframes stripes
+  from
+    background-position: 40px 0
+  to
+    background-position: 0 0
+
+@keyframes spinner
+  0%
+    transform rotate(0deg)
+  50%
+    transform rotate(180deg)
+  100%
+    transform rotate(360deg)
+
+global-reset()
+
+$color_bg = #2C4662
+$color_bg_light = #3A5977
+
+$color_dk = rgba(0, 0, 0, .5)
+$color_dk_light = rgba(0, 0, 0, .1)
+$color_dk_sneak = rgba(0, 0, 0, .3)
+$color_dk_hover = rgba(0, 0, 0, .7)
+$color_dk_focus = rgba(0, 0, 0, 1)
+
+$color_br = rgba(255,255,255,.5)
+$color_br_light = rgba(255, 255, 255, .1)
+$color_br_sneak = rgba(255, 255, 255, .3)
+$color_br_hover = rgba(255, 255, 255, .7)
+$color_br_focus = rgba(255, 255, 255, 1)
+
+html, body
+  margin 0
+  padding 0
+  width 100%
+  height 100%
+  color $color_br
+  font normal 14px/1.4 'Helvetica Neue', 'HelveticaNeue', Helvetica, Arial, Sans-Serif
+
+html
+  background-color $color_bg
+  background-image linear-gradient(top, $color_bg_light, $color_bg)
+  background-size 100% 500px
+  background-repeat repeat-x
+  min-height 500px
+
+body
+  background-color transparent
+  min-height 500px
+
+table
+  table-layout fixed
+  margin 0
+  width 100%
+
+// ===================================
+// ui
+// ===================================
+
+.ui-wrapper
+  margin 0 auto
+  width 960px
+
+.ui-section
+  padding 0 30px
+
+.ui-progress
+  z-index 99998
+  position fixed
+  top -10px
+  left 0
+  right 0
+  height 10px
+  &.ui-progress-active .progress-bar
+    animation stripes .2s linear infinite
+  .progress
+    border-radius 0
+    height 10px
+  .progress-bar
+    width 100%
+    border-radius 0
+
+.ui-selectbox
+  position relative
+  &:hover
+    .ui-selectbox-candidate
+      display block
+  .ui-selectbox-candidate
+    display none
+    position absolute
+    top 0
+    left 0
+    td
+      cursor pointer
+      color #444444
+      background white
+      &:hover
+        color #3E5266
+        background #E6EFF7
+      &.item-side-entry-active
+        cursor default
+        color #3E5266
+        background #E6EFF7
+
+.ui-spinner
+  width 20px
+  height 20px
+  border-radius 50%
+  border 1px solid $color_br_focus
+  border-right-color transparent
+  &.ui-spinner-active
+    animation spinner .5s linear infinite
+
+.ui-autoload
+  position fixed
+  left 0
+  right 0
+  bottom -50px
+  background $color_dk_hover
+  table
+    margin 0 auto
+    width 300px
+    height 50px
+  td
+    text-align center
+    font-weight 500
+    font-size 24px
+    color $color_br_focus
+    &:first-child
+      width 20px
+
+.ui-dialog
+  z-index 99999
+  visibility hidden
+  position fixed
+  top 0
+  right 0
+  bottom 0
+  left 0
+  text-align center
+  background-size cover
+  background-position 50% 50%
+  table
+    width 100%
+    height 100%
+  td
+    text-align center
+  &.ui-dialog-opaque
+    background-color rgba(26, 46, 69, .72)
+  &.ui-dialog-lock
+    background-color black
+  .ui-dialog-keydriver
+    opacity 0
+    position absolute
+    top 0
+    left 0
+  .ui-dialog-container
+    margin 0 auto
+    padding 20px
+    width 270px
+    background #F3F3F3
+    border-radius 3px
+  .ui-dialog-message
+    padding-bottom 10px
+    color #444
+  .ui-dialog-button
+    margin 0 2%
+    width 40%
+
+// ===================================
+// account
+// ===================================
+
+#account
+  position relative
+  z-index 88888
+
+#navi
+  height 70px
+  td:first-child
+    padding 0 15px
+  td:last-child
+    padding 0 15px
+  .navi-head a
+    font-weight 500
+    font-size 24px
+    color $color_br_focus
+    &:hover
+      color $color_br_focus
+      text-decoration none
+  .navi
+    position relative
+    width 50px
+    text-align center
+    font-size 18px
+    a
+      color $color_br
+      &:hover
+        color $color_br_hover
+    &.navi-active
+      a
+        color $color_br_focus
+      &:after
+        content ''
+        display block
+        position absolute
+        bottom 0
+        left 15px
+        width 0
+        height 0
+        border 10px solid transparent
+        border-bottom-color $color_bg
+
+  .navi-form
+    width 250px
+    form
+      position relative
+      width 100%
+      height 30px
+      border-radius 30px
+      background $color_bg
+    button
+      display inline-block
+      position absolute
+      left 0
+      top 0
+      bottom 0
+      width 30px
+      height 30px
+      border none
+      background transparent
+      color $color_br_sneak
+      text-align center
+      &:hover
+        color $color_br_hover
+    input
+      display block
+      position absolute
+      left 30px
+      top 0
+      right 0
+      bottom 0
+      padding-left 0
+      padding-right 15px
+      width auto
+      font-weight 500
+      color $color_br
+      background transparent
+      border none
+      box-shadow none
+      placeholder(color $color_br_sneak, font-weight 500)
+      &:focus
+        outline none
+
+#auth
+  form
+    margin 0 auto
+    width 270px
+  .form-group
+    border 1px solid #444444
+    border-radius 6px
+    background linear-gradient(top, rgba(221,229,237,1),rgba(242,243,244,1))
+    box-shadow inset 0 1px 3px rgba(0,0,0,0.36),0 1px 0 rgba(255,255,255,0.15)
+  h1
+    margin 0 0 15px 0
+    font-weight 500
+    font-size 36px
+    color $color_br_focus
+    text-shadow 1px 1px 0 rgba(0,0,0,0.32)
+    text-align center
+  input
+    border none
+    box-shadow none
+    background transparent
+    border-radius 0
+    font-size 14px
+    &:first-child
+      border-bottom 1px solid #CCD0D4
+  button
+    width 100%
+    box-shadow inset 0 1px 0 0 rgba(255,255,255,.6),0 1px 0 0 rgba(255,255,255,0.14902)
+    border 1px solid rgba(0,0,0,0.65)
+    background linear-gradient(top, #6aa5cf, #5791bb)
+    text-shadow 0 -1px 0 rgba(0,0,0,0.32)
+    font-size 14px
+
+// ===================================
+// content
+// ===================================
+
+#item
+  border-radius 15px
+  background $color_bg
+  min-height 500px - 70px
+
+  td
+    padding 20px
+    vertical-align top
+
+  .item-main
+    padding-right 0
+    color $color_dk
+
+    .item
+      position relative
+      min-height 64px
+      margin-bottom 20px
+
+      .item-icon
+        display inline-block
+        position absolute
+        top 0
+        left 0
+        width 64px
+        height 64px
+        background-color $color_dk_sneak
+        background-size cover
+        background-position 50% 50%
+        border-radius 6px
+        cursor pointer
+        img
+          width 100%
+          height 100%
+
+      .item-body
+        position relative
+        margin-left 84px
+        min-height 64px
+        font-size 12px
+        background $color_br_focus
+        border-radius 6px
+        &:after
+          content ''
+          display block
+          position absolute
+          top 23px
+          left -20px
+          width 0
+          height 0
+          border 10px solid transparent
+          border-right-color $color_br_focus
+
+      .item-body-header
+        padding 20px
+        a
+          color $color_dk_sneak
+          cursor pointer
+          &:hover
+            color $color_dk_hover
+        .item-body-header-title
+          width 360px
+          overflow ellipsis
+        .item-body-header-series
+          width 146px
+          overflow ellipsis
+          text-align right
+
+      .item-body-player
+        padding 0 20px
+        audio, video, .image
+          min-width 100%
+          max-width 100%
+          background black
+
+      .item-body-footer
+        padding 0 20px
+        height 44px
+        background #F4F4F4
+        border-radius 0 0 6px 6px
+
+      // .item-body-dodger
+      //   display none
+      //   position absolute
+      //   top 0
+      //   right 0
+      //   background $color_dk_sneak
+      //   width 12px
+      //   height 12px
+      //   border-radius 0 0 0 6px
+      //   cursor pointer
+      //   &:after
+      //     content ' '
+      //     display block
+      //     width 0
+      //     height 0
+      //     border-style solid
+      //     border-width 0 12px 12px 0
+      //     border-color: transparent $color_bg transparent transparent;
+
+  .item-side
+    position relative
+    width 250px
+    font-size 12px
+    color $color_br_sneak
+
+    .item-side-container
+      padding-bottom 60px
+      width 210px
+
+    .item-stat
+      display none
+      opacity 0
+
+    .item-user
+      .item-user-icon
+        display inline-block
+        margin 5px 0
+        width 25px
+        height 25px
+        background-color $color_dk_sneak
+        background-size cover
+        background-position 50% 50%
+        border-radius 3px
+
+    .item-play
+      position fixed
+      bottom 0
+      width 210px
+
+    table
+      margin-bottom 21px
+
+    // tr:last-child td
+    //   border-bottom none
+
+    .item-side-entry
+      span
+        width 50px
+        overflow ellipsis
+      .pull-right
+        width 150px
+        text-align right
+        overflow ellipsis
+      .item-stat-clickable
+        cursor pointer
+        &:hover
+          color $color_br_hover
+
+    th.item-side-entry
+      padding 0 5px
+      height 42px
+      font-weight 500
+      border-bottom 2px solid $color_br_light
+      vertical-align bottom
+
+    td.item-side-entry
+      padding 0 5px
+      height 35px
+      line-height 35px
+      vertical-align middle
+      border-bottom 1px solid $color_br_light
+// @media screen and (max-width:960px)
+//   #navi
+//     display none
