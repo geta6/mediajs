@@ -139,18 +139,18 @@ html
         .item-body-player
           <% if (type == '.mp4') { %>
           video(controls='controls', preload='none')
-            source(type='video/mp4', src!='https://api.geta6.net/content/media?id=<%- id %>')
-            object(type='application/x-shockwave-flash', data='//cdnjs.geta6.com/ajax/libs/mediaelement/2.11.3/js/flashmediaelement.swf')
-              param(name='movie', value='flashmediaelement.swf')
-              param(name=flashvars, value='controls=true,file=https://api.geta6.net/content/media?id=<%- id %>')
+            source(type='video/mp4', src!='<%- media %>')
+            object(type='application/x-shockwave-flash', data!='<%- flash %>')
+              param(name='movie', value!='<%- flash %>')
+              param(name='flashvars', value!='controls=true&file=<%- media %>')
           <% } else if (type == '.mp3') { %>
           audio(controls='controls', preload='none')
-            source(type='audio/mp3', src!='https://api.geta6.net/content/media?id=<%- id %>')
-            object(type='application/x-shockwave-flash', data='//cdnjs.geta6.com/ajax/libs/mediaelement/2.11.3/js/flashmediaelement.swf')
-              param(name='movie', value='flashmediaelement.swf')
-              param(name=flashvars, value='controls=true,file=https://api.geta6.net/content/media?id=<%- id %>')
+            source(type='audio/mp3', src!='<%- media %>')
+            object(type='application/x-shockwave-flash', data!='<%- flash %>')
+              param(name='movie', value!='<%- flash %>')
+              param(name='flashvars', value!='controls=true&file=<%- media %>')
           <% } else if (type == '.pdf') { %>
-          img.image(src!='https://api.geta6.net/content/media?id=<%- id %>&page=1', data-src!='https://api.geta6.net/content/media?id=<%- id %>', data-page='1')
+          img.image(src!='https://api.geta6.net/content/media.jpg?id=<%- id %>&page=1', data-src!='https://api.geta6.net/content/media?id=<%- id %>', data-page='1')
           <% } %>
         .item-body-footer
 

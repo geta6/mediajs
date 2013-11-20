@@ -156,7 +156,9 @@ class PlayerView extends Backbone.View
     @$el.addClass 'item item-player'
 
   render: ->
-    @$el.html @template @model.toJSON()
+    @$el.html @template _.extend @model.toJSON(),
+      media: "https://api.geta6.net/content/media?id=#{@model.get 'id'}"
+      flash: "http://cdnjs.geta6.com/ajax/libs/mediaelement/2.11.3/js/flashmediaelement.swf"
     switch @model.get 'type'
       when '.mp4'
         $el = @$ 'video'
@@ -361,8 +363,6 @@ class ContentsView extends Backbone.View
       unless $sidebar.sticky
         $sidebar.sticky = yes
         $sidebar.el.css { position: 'fixed', top: 0 }
-    # @$sidebarSticky
-    # console.log winheight, docheight
 
   accountUpdate: ->
     @$el.find('.js-item-user-icon').css 'background-image', "url(#{media.account.get 'icon'})"
@@ -478,7 +478,6 @@ class Application extends Backbone.Router
           @fetching = no
           done() if typeof done is 'function'
         .fail (err) =>
-          console.error err
           ui.progress off
           @fetching = no
           done() if typeof done is 'function'
