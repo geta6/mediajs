@@ -36,7 +36,7 @@ while arg = args.shift()
           Lint:
             jshint, csslint
           Minify:
-            uglify, cssmin, htmlmin
+            uglify, cssmin
           Server:
             connect, watch
           Phony:
@@ -77,14 +77,12 @@ module.exports = (grunt) ->
         }]
 
     jade:
-      options:
-        pretty: yes
       compile:
         files: [{
           expand: yes
           cwd: 'assets/'
           src: [ '**/*.jade' ]
-          dest: 'dist/'
+          dest: 'public/'
           ext: '.html'
         }]
 
@@ -119,16 +117,6 @@ module.exports = (grunt) ->
           src: [ '**/*.css' ]
           dest: 'public/'
           ext: '.css'
-        }]
-
-    htmlmin:
-      minify:
-        files: [{
-          expand: yes
-          cwd: 'dist/'
-          src: [ '**/*.html' ]
-          dest: 'public/'
-          ext: '.html'
         }]
 
     watch:
@@ -170,7 +158,6 @@ module.exports = (grunt) ->
   # minify
   grunt.loadNpmTasks 'grunt-contrib-uglify'
   grunt.loadNpmTasks 'grunt-contrib-cssmin'
-  grunt.loadNpmTasks 'grunt-contrib-htmlmin'
   # utility
   grunt.loadNpmTasks 'grunt-contrib-concat'
   grunt.loadNpmTasks 'grunt-contrib-connect'
@@ -184,6 +171,5 @@ module.exports = (grunt) ->
     #'csslint'
     'cssmin'
     'jade'
-    'htmlmin'
   ]
   grunt.registerTask 'default', ['build', 'connect', 'watch']
