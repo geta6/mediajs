@@ -3,7 +3,7 @@ html
 
   head
     meta(charset='utf-8')
-    title Assemblr
+    title getumblr.
     link(rel='stylesheet', href='//cdnjs.geta6.com/ajax/libs/twitter-bootstrap/3.0.0/css/bootstrap.min.css')
     link(rel='stylesheet', href='//cdnjs.geta6.com/ajax/libs/mediaelement/2.11.3/css/mediaelementplayer.min.css')
     link(rel='stylesheet', href='/media.css')
@@ -32,7 +32,7 @@ html
       .ui-dialog.ui-dialog-lock(style='visibility:visible;background-image:url(http://mogashi.no-ip.org/alice)')
         table#auth: tr: td
           form(method='POST', action='https://api.geta6.net/session/create')
-            h1 assemblr.
+            h1 getumblr.
             input(type='hidden', name='callback', value!='<%- callback %>')
             .form-group
               input.input-lg.form-control.username(type='text', name='username', placeholder='Username', autocomplete='off', autocorrect='off', autocapitalize='off')
@@ -40,7 +40,7 @@ html
             button.btn.btn-lg.btn-primary(type='submit') Log in
       <% } else { %>
       table#navi: tr
-        td.navi-head: a.js-navi-home(href='javascript:void(0)') assemblr.
+        td.navi-head: a.js-navi-home(href='javascript:void(0)') getumblr.
         td.navi.js-navi: a.js-navi-home(href='javascript:void(0)'): .glyphicon.glyphicon-home
         td.navi.js-navi: a.js-navi-mail(href='javascript:void(0)'): .glyphicon.glyphicon-envelope
         td.navi.js-navi: a.js-navi-help(href='javascript:void(0)'): .glyphicon.glyphicon-question-sign
