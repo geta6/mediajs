@@ -151,13 +151,16 @@ class PlayerView extends Backbone.View
   events:
     'click .image': 'clickImage'
     'mousemove .image': 'hoverImage'
+    'click .item-body-header-title': 'navigateBrowseFile'
+    'click .item-body-header-series': 'navigateBrowseDir'
+    'click .item-body-footer-save': 'navigateRawURL'
 
   initialize: ->
     @$el.addClass 'item item-player'
 
   render: ->
     @$el.html @template _.extend @model.toJSON(),
-      media: "https://api.geta6.net/content/media?id=#{@model.get 'id'}"
+      media: media = "https://api.geta6.net/content/media?id=#{@model.get 'id'}"
       flash: "http://cdnjs.geta6.com/ajax/libs/mediaelement/2.11.3/js/flashmediaelement.swf"
     switch @model.get 'type'
       when '.mp4'
@@ -167,6 +170,19 @@ class PlayerView extends Backbone.View
         $el = @$ 'audio'
         $el.mediaelementplayer(enableAutosize: yes)
     return @
+
+  navigateRawURL: ->
+    window.location.href = "https://api.geta6.net/content/media?id=#{@model.get 'id'}"
+
+  navigateBrowseDir: ->
+    (path = (@model.get 'path').split '/').pop()
+    path[i] = encodeURIComponent p for p, i in path
+    $app.navigate "/browse/#{path.join '/'}", yes
+
+  navigateBrowseFile: ->
+    path = (@model.get 'path').split '/'
+    path[i] = encodeURIComponent p for p, i in path
+    $app.navigate "/browse/#{path.join '/'}", yes
 
   hoverImage: (event) ->
     $el = $ event.currentTarget

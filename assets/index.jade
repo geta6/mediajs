@@ -150,9 +150,30 @@ html
               param(name='movie', value!='<%- flash %>')
               param(name='flashvars', value!='controls=true&file=<%- media %>')
           <% } else if (type == '.pdf') { %>
-          img.image(src!='https://api.geta6.net/content/media.jpg?id=<%- id %>&page=1', data-src!='https://api.geta6.net/content/media?id=<%- id %>', data-page='1')
+          img.image(src!='<%- media %>&page=1', data-src!='<%- media %>', data-page='1')
           <% } %>
         .item-body-footer
+          a.pull-left.item-body-footer-icon.item-body-footer-save
+            .glyphicon.glyphicon-save
+          a.pull-right.item-body-footer-icon.item-body-footer-like
+            .glyphicon.glyphicon-heart
+
+    script(type='text/template')
+      <% if (type == '.mp4') { %>
+      video(controls='controls', preload='none')
+        source(type='video/mp4', src!='<%- media %>')
+        object(type='application/x-shockwave-flash', data!='<%- flash %>')
+          param(name='movie', value!='<%- flash %>')
+          param(name='flashvars', value!='controls=true&file=<%- media %>')
+      <% } else if (type == '.mp3') { %>
+      audio(controls='controls', preload='none')
+        source(type='audio/mp3', src!='<%- media %>')
+        object(type='application/x-shockwave-flash', data!='<%- flash %>')
+          param(name='movie', value!='<%- flash %>')
+          param(name='flashvars', value!='controls=true&file=<%- media %>')
+      <% } else if (type == '.pdf') { %>
+      img.image(src!='<%- media %>&page=1', data-src!='<%- media %>', data-page='1')
+      <% } %>
 
     script(src='//cdnjs.geta6.com/ajax/libs/jquery/2.0.3/jquery.min.js')
     script(src='//cdnjs.geta6.com/ajax/libs/underscore.js/1.5.2/underscore-min.js')
