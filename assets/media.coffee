@@ -25,7 +25,7 @@ $api =
 
   browse: (data = {}) ->
     unless data.path
-      throw Error 'no path'
+      throw new Error 'no path'
     return $.ajax 'https://api.geta6.net/content/browse.json',
       type: 'GET'
       data: data

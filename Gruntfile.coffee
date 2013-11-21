@@ -77,7 +77,17 @@ module.exports = (grunt) ->
         }]
 
     jade:
-      compile:
+      debug:
+        options:
+          pretty: yes
+        files: [{
+          expand: yes
+          cwd: 'assets/'
+          src: [ '**/*.jade' ]
+          dest: 'dist/'
+          ext: '.html'
+        }]
+      release:
         files: [{
           expand: yes
           cwd: 'assets/'
@@ -85,19 +95,6 @@ module.exports = (grunt) ->
           dest: 'public/'
           ext: '.html'
         }]
-
-    #jshint:
-    #  options:
-    #    jshintrc: '.jshintrc'
-    #  files: 'dist/**/*.js'
-
-    #csslint:
-    #  options:
-    #    csslintrc: '.csslintrc'
-    #  lax:
-    #    options:
-    #      import: 2
-    #    src: 'dist/**/*.css'
 
     uglify:
       minify:
@@ -152,24 +149,13 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-coffee'
   grunt.loadNpmTasks 'grunt-contrib-stylus'
   grunt.loadNpmTasks 'grunt-contrib-jade'
-  # lint
-  #grunt.loadNpmTasks 'grunt-contrib-jshint'
-  #grunt.loadNpmTasks 'grunt-contrib-csslint'
   # minify
   grunt.loadNpmTasks 'grunt-contrib-uglify'
   grunt.loadNpmTasks 'grunt-contrib-cssmin'
   # utility
-  grunt.loadNpmTasks 'grunt-contrib-concat'
   grunt.loadNpmTasks 'grunt-contrib-connect'
   grunt.loadNpmTasks 'grunt-contrib-watch'
 
-  grunt.registerTask 'build', [
-    'coffee'
-    #'jshint'
-    'uglify'
-    'stylus'
-    #'csslint'
-    'cssmin'
-    'jade'
-  ]
-  grunt.registerTask 'default', ['build', 'connect', 'watch']
+  grunt.registerTask 'build', ['coffee', 'uglify', 'stylus', 'cssmin', 'jade']
+  grunt.registerTask 'server', ['build', 'connect', 'watch']
+  grunt.registerTask 'default', ['build', 'watch']
