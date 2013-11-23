@@ -158,13 +158,10 @@ class ContentView extends Backbone.View
     'click .item-body-header-title': 'navigateBrowseFile'
     'click .item-body-header-series': 'navigateBrowseDir'
 
-  bindigns: {}
-
   initialize: ->
     @$el.addClass 'item'
 
   render: ->
-    console.log @model.toJSON()
     unless @model.get 'player'
       @$el.html @template @model.toJSON()
     else
