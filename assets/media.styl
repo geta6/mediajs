@@ -169,6 +169,12 @@ table
     margin 0 2%
     width 40%
 
+.ui-colored
+  &.glyphicon-heart
+    color #D32B2B
+  &.glyphicon-retweet
+    color #67A540
+
 // ===================================
 // account
 // ===================================
@@ -345,16 +351,18 @@ table
       .item-body-header
         padding 20px
         a
+          display inline-block
           color $color_dk_sneak
           cursor pointer
           &:hover
             color $color_dk_hover
+        .item-body-header-icon
+          width 20px
+          overflow ellipsis
         .item-body-header-title
-          display inline-block
-          width 360px
+          width 340px
           overflow ellipsis
         .item-body-header-series
-          display inline-block
           width 146px
           overflow ellipsis
           text-align right
@@ -388,7 +396,8 @@ table
         .item-body-footer-status
           padding-left 20px
           text-align left
-          span
+          & > div
+            display inline-block
             padding-right 15px
             font-weight 600
             color $color_dk_sneak
@@ -397,6 +406,46 @@ table
         .item-body-footer-action
           font-size 18px
           text-align right
+        .item-body-footer-notes-box
+          position relative
+          &:hover
+            .item-body-footer-notes
+              display block
+          .item-body-footer-notes
+            z-index 200
+            display none
+            position absolute
+            top -100px
+            left 36px
+            margin-top 22px
+            width 360px
+            height 200px
+            background $color_br_focus
+            box-shadow 0 0 2px $color_dk_sneak
+            border-radius 6px
+            .item-body-footer-notes-inside
+              overflow-y scroll
+              .item-body-footer-notes-note
+                padding-left 44px
+                height 44px
+                border-bottom 1px solid $color_dk_light
+                background-size 24px 24px
+                background-position 10px 10px
+                background-repeat no-repeat
+                &:hover
+                  background-color #F5F5F5
+            &:after
+              content ' '
+              position absolute
+              left -24px
+              top 50%
+              display block
+              margin-top -12px
+              width 0
+              height 0
+              border-style solid
+              border-width 12px
+              border-color transparent $color_br_focus transparent transparent
 
 
       // .item-body-dodger
@@ -480,6 +529,3 @@ table
       line-height 35px
       vertical-align middle
       border-bottom 1px solid $color_br_light
-// @media screen and (max-width:960px)
-//   #navi
-//     display none

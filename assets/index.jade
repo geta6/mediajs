@@ -1,6 +1,5 @@
 !!! 5
 html
-
   head
     meta(charset='utf-8')
     title getumblr.
@@ -42,7 +41,7 @@ html
       table#navi: tr
         td.navi-head: a.js-navi-home(href='javascript:void(0)') getumblr.
         td.navi.js-navi: a.js-navi-home(href='javascript:void(0)'): .glyphicon.glyphicon-home
-        td.navi.js-navi: a.js-navi-mail(href='javascript:void(0)'): .glyphicon.glyphicon-envelope
+        td.navi.js-navi: a.js-navi-mail(href='javascript:void(0)'): .glyphicon.glyphicon-bullhorn
         td.navi.js-navi: a.js-navi-help(href='javascript:void(0)'): .glyphicon.glyphicon-question-sign
         td.navi.js-navi: a.js-navi-conf(href='javascript:void(0)'): .glyphicon.glyphicon-cog
         td.navi.js-navi: a.js-navi-logout(href='javascript:void(0)'): .glyphicon.glyphicon-off
@@ -125,8 +124,22 @@ html
       .item-icon(style!='background-image:url(https://api.geta6.net/content/thumb?id=<%- id %>)')
       .item-body
         .item-body-header
-          .item-body-header-title: a <%- details.title %>
-          .pull-right.item-body-header-series: a <%- details.series %>
+          a.item-body-header-icon
+            <% if (type == '.mp3') { %>
+            .glyphicon.glyphicon-music
+            <% } else if (type == '.mp4') { %>
+            .glyphicon.glyphicon-film
+            <% } else if (type == '.pdf') { %>
+            .glyphicon.glyphicon-book
+            <% } else { %>
+            .glyphicon.glyphicon-folder-open
+            <% } %>
+          a.item-body-header-title
+            span <%- ('000' + details.track).slice(-3) %>
+            span &nbsp;
+            span <%- details.title %>
+          a.pull-right.item-body-header-series
+            span <%- details.series %>
         .item-body-player
           <% if (player) { if (type == '.mp4') { %>
           video.item-body-player-media.item-body-player-video(controls='controls', preload='none')
@@ -148,21 +161,14 @@ html
         .item-body-footer
           table: tr
             td.item-body-footer-status
-              span <%- moment(created).fromNow() %>
-              <% var sum = view.length + fav.length %>
-              <% if (0 < sum) { %>
-              span <%- sum %> note<%- 1 < sum ? 's' : '' %>
-              <% } %>
+              div <%- moment(created).fromNow() %>
+              .item-body-footer-notes-box
             td.item-body-footer-action
-              a(href='javascript:void(0)'): .glyphicon.glyphicon-retweet
-              a(href='javascript:void(0)'): .glyphicon.glyphicon-heart
-          //- .item-body-footer-notes
-            <% _.each(_.uniq(fav), function(id){ %>
-            img(src!='https://api.geta6.net/account/icon?id=<%- id %>')
-            <% }); %>
-            <% _.each(_.uniq(view), function(fav){ %>
-            img(src!='https://api.geta6.net/account/icon?id=<%- id %>')
-            <% }); %>
+              <% if (type != 'd') { %>
+              a(href='javascript:void(0)'): .js-item-body-footer-action-reb.glyphicon.glyphicon-retweet
+              a(href='javascript:void(0)'): .js-item-body-footer-action-fav.glyphicon.glyphicon-heart
+              <% } %>
+
 
     script(src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js')
     script(src='//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js')

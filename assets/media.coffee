@@ -5,11 +5,6 @@
 # ===================================
 
 $api =
-  logout: ->
-    return $.ajax 'https://api.geta6.net/session/delete',
-      type: 'POST'
-      beforeSend: ->
-
   account: ->
     return $.ajax 'https://api.geta6.net/account/me.json',
       type: 'GET'
@@ -24,11 +19,26 @@ $api =
       beforeSend: ->
 
   browse: (data = {}) ->
-    unless data.q
-      throw new Error 'no q'
+    throw new Error 'no q' unless data.q
     return $.ajax 'https://api.geta6.net/content/browse.json',
       type: 'GET'
       data: data
+      dataType: 'jsonp'
+      beforeSend: ->
+
+  favorite: (id) ->
+    throw new Error 'no id' unless id
+    return $.ajax 'https://api.geta6.net/account/fav/create.json',
+      type: 'GET'
+      data: id: id
+      dataType: 'jsonp'
+      beforeSend: ->
+
+  unfavorite: (id) ->
+    throw new Error 'no id' unless id
+    return $.ajax 'https://api.geta6.net/account/fav/delete.json',
+      type: 'GET'
+      data: id: id
       dataType: 'jsonp'
       beforeSend: ->
 
@@ -152,16 +162,16 @@ class ContentView extends Backbone.View
   template: _.template ($ '#tmpl-content').html()
 
   events:
-    'mousemove .item-body-player-image': 'hoverImage'
-    'click .item-body-player-image': 'clickImage'
+    'click .js-item-body-footer-action-fav': 'favContent'
     'click .item-icon': 'navigateBrowseFile'
     'click .item-body-header-title': 'navigateBrowseFile'
     'click .item-body-header-series': 'navigateBrowseDir'
+    'mousemove .item-body-player-image': 'hoverImage'
+    'click .item-body-player-image': 'clickImage'
 
   initialize: ->
+    @listenTo @model, 'change', @render
     @$el.addClass 'item'
-
-  render: ->
     unless @model.get 'player'
       @$el.html @template @model.toJSON()
     else
@@ -182,7 +192,46 @@ class ContentView extends Backbone.View
               page = parseInt $page.val()
               @bookJump src, page
             , 500
+
+  render: ->
+    if @model.get 'isfav'
+      (@$ '.js-item-body-footer-action-fav').addClass 'ui-colored'
+    else
+      (@$ '.js-item-body-footer-action-fav').removeClass 'ui-colored'
+    stats = (@$ '.item-body-footer-notes-box').empty()
+    fav = @model.get 'fav'
+    view = @model.get 'view'
+    sum = fav.length + view.length
+    if 0 < sum
+      stats.text("#{sum} note#{if 1 < sum then 's' else ''}")
+    if 0 < fav.length
+      stats.append ($ '<div>')
+        .addClass('item-body-footer-notes')
+        .append notes = ($ '<div>')
+          .addClass 'item-body-footer-notes-inside'
+      for fav in _.uniq @model.get 'fav'
+        notes.append ($ '<div>')
+          .addClass('item-body-footer-notes-note').text("liked this")
+          .css('background-image', "url(https://api.geta6.net/account/icon?id=#{fav})")
     return @
+
+  favContent: ->
+    me = media.account.get 'id'
+    fav = @model.get 'fav'
+    (@$ '.js-item-body-footer-action-fav').toggleClass 'ui-colored'
+    if @model.get 'isfav'
+      $.when($api.unfavorite @model.get 'id')
+        .fail =>
+          console.log 'fail'
+        .then =>
+          fav.splice (fav.indexOf me), 1
+          @model.set { isfav: no, fav: fav }
+          console.log @model.toJSON()
+    else
+      $.when($api.favorite @model.get 'id')
+        .then =>
+          fav.unshift me
+          @model.set { isfav: yes, fav: fav }
 
   navigateBrowseDir: ->
     (path = (@model.get 'path').split '/').pop()
