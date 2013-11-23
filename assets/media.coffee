@@ -24,8 +24,8 @@ $api =
       beforeSend: ->
 
   browse: (data = {}) ->
-    unless data.path
-      throw new Error 'no path'
+    unless data.q
+      throw new Error 'no q'
     return $.ajax 'https://api.geta6.net/content/browse.json',
       type: 'GET'
       data: data
@@ -164,6 +164,7 @@ class ContentView extends Backbone.View
     @$el.addClass 'item'
 
   render: ->
+    console.log @model.toJSON()
     unless @model.get 'player'
       @$el.html @template @model.toJSON()
     else
@@ -497,8 +498,7 @@ class Application extends Backbone.Router
 
   browse: (path) ->
     @current = 'browse'
-    media.query.q = ''
-    media.query.path = path
+    media.query.q = path
     media.contents.reset()
     @fetch media.query, ->
       media.accountView.changetab 'home'
