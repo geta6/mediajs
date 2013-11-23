@@ -26,6 +26,14 @@ html
 
     #ui-config.ui-config.ui-config-opaque: table: tr: td
 
+    #ui-preview.ui-dialog.ui-dialog-opaque: table: tr: td
+      .ui-dialog-container
+        input.ui-dialog-keydriver
+        .ui-dialog-message: p
+        .ui-dialog-control
+          button.ui-dialog-button.btn.btn-sm.btn-default Close
+          button.ui-dialog-button.btn.btn-sm.btn-primary View
+
     script#tmpl-account(type='text/template')
       <% if (callback) { %>
       .ui-dialog.ui-dialog-lock(style='visibility:visible;background-image:url(http://mogashi.no-ip.org/alice)')
@@ -141,23 +149,7 @@ html
           a.pull-right.item-body-header-series
             span <%- details.series %>
         .item-body-player
-          <% if (player) { if (type == '.mp4') { %>
-          video.item-body-player-media.item-body-player-video(controls='controls', preload='none')
-            source(type='video/mp4', src!='<%- media %>')
-            object(type='application/x-shockwave-flash', data='//cdnjs.cloudflare.com/ajax/libs/mediaelement/2.11.3/js/flashmediaelement.swf')
-              param(name='movie', value='//cdnjs.cloudflare.com/ajax/libs/mediaelement/2.11.3/js/flashmediaelement.swf')
-              param(name='flashvars', value!='controls=true&file=<%- media %>')
-          <% } else if (type == '.mp3') { %>
-          audio.item-body-player-media.item-body-player-audio(controls='controls', preload='none')
-            source(type='audio/mp3', src!='<%- media %>')
-            object(type='application/x-shockwave-flash', data='//cdnjs.cloudflare.com/ajax/libs/mediaelement/2.11.3/js/flashmediaelement.swf')
-              param(name='movie', value='//cdnjs.cloudflare.com/ajax/libs/mediaelement/2.11.3/js/flashmediaelement.swf')
-              param(name='flashvars', value!='controls=true&file=<%- media %>')
-          <% } else if (type == '.pdf') { %>
-          .form-group
-            input.form-control.item-body-player-page(value='1')
-          img.item-body-player-image(src!='<%- media %>&page=1', data-src!='<%- media %>', data-page='1')
-          <% } } %>
+          <% if (player) { print(player) } %>
         .item-body-footer
           table: tr
             td.item-body-footer-status
@@ -168,6 +160,26 @@ html
               a(href='javascript:void(0)'): .js-item-body-footer-action-reb.glyphicon.glyphicon-retweet
               a(href='javascript:void(0)'): .js-item-body-footer-action-fav.glyphicon.glyphicon-heart
               <% } %>
+
+    script#tmpl-player(type='text/template')
+      .item-body-player-container
+        <% if (type == '.mp4') { %>
+        video.item-body-player-media.item-body-player-video(controls='controls', preload='none')
+          source(type='video/mp4', src!='https://api.geta6.net/content/media?id=<%- id %>')
+          object(type='application/x-shockwave-flash', data='//cdnjs.cloudflare.com/ajax/libs/mediaelement/2.11.3/js/flashmediaelement.swf')
+            param(name='movie', value='//cdnjs.cloudflare.com/ajax/libs/mediaelement/2.11.3/js/flashmediaelement.swf')
+            param(name='flashvars', value!='controls=true&file=https://api.geta6.net/content/media?id=<%- id %>')
+        <% } else if (type == '.mp3') { %>
+        audio.item-body-player-media.item-body-player-audio(controls='controls', preload='none')
+          source(type='audio/mp3', src!='https://api.geta6.net/content/media?id=<%- id %>')
+          object(type='application/x-shockwave-flash', data='//cdnjs.cloudflare.com/ajax/libs/mediaelement/2.11.3/js/flashmediaelement.swf')
+            param(name='movie', value='//cdnjs.cloudflare.com/ajax/libs/mediaelement/2.11.3/js/flashmediaelement.swf')
+            param(name='flashvars', value!='controls=true&file=https://api.geta6.net/content/media?id=<%- id %>')
+        <% } else if (type == '.pdf') { %>
+        .form-group
+          input.form-control.item-body-player-page(value='1')
+        img.item-body-player-image(src!='https://api.geta6.net/content/media?id=<%- id %>&page=1', data-src!='https://api.geta6.net/content/media?id=<%- id %>', data-page='1')
+        <% } %>
 
 
     script(src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js')

@@ -49,10 +49,9 @@ $api =
 ui =
   animationTime: 240
 
-  dialog: (message, done) ->
-    media.accountView.changetab 'logout'
-    $el = $ '#ui-dialog'
-    $el.find('p').text message
+  _dialogDriver: ($el, callback = {}) ->
+    callback.accept or= ->
+    callback.cancel or= ->
     $el.css 'visibility', 'visible'
     $box = $el.find('.ui-dialog-keydriver').focus()
     $box.on 'blur keyup', (event) ->
@@ -64,11 +63,38 @@ ui =
           $el.find('.btn-primary').trigger 'click'
     $el.find('.btn-primary').one 'click', ->
       $box.off 'blur keyup'
-      done()
+      $el.css 'visibility', 'hidden'
+      callback.accept()
     $el.find('.btn-default').one 'click', ->
       $box.off 'blur keyup'
       $el.css 'visibility', 'hidden'
-      media.accountView.changetab media.accountView.pretab
+      callback.cancel()
+
+  dialog: (message, callback) ->
+    media.accountView.changetab 'logout'
+    $el = $ '#ui-dialog'
+    $el.find('p').text message
+    ui._dialogDriver $el, callback
+
+  preview: (object, callback) ->
+    $el = $ '#ui-preview'
+    $el.find('p').html ui.playerTemplate object
+    ui._dialogDriver $el, callback
+    switch object.type
+      when '.mp4', '.mp3'
+        $el.find('.item-body-player-media').mediaelementplayer
+          enableAutosize: on
+      when '.pdf'
+        $img = $el.find '.item-body-player-image'
+        $page = $el.find '.item-body-player-page'
+        $key = null
+        $page.on 'keyup', =>
+          clearTimeout $key
+          $key = setTimeout =>
+            src = $img.attr 'data-src'
+            page = parseInt $page.val()
+            @bookJump src, page
+          , 500
 
   spinner: (active = no) ->
     if active
@@ -87,6 +113,49 @@ ui =
         top: -1 * $progress.height()
       , ui.animationTime, ->
         $progress.removeClass 'ui-progress-active'
+
+  _playerTemplate: null
+  playerTemplate: ->
+    if ui._playerTemplate is null
+      ui._playerTemplate = _.template ($ '#tmpl-player').html()
+
+    player = ui._playerTemplate.apply window, arguments
+
+    ($ '.item-body-player-image').off 'click mousemove'
+    $doc.on 'mousemove', '.item-body-player-image', (event) ->
+      $el = $ event.currentTarget
+      width = $el.width()
+      offset = event.offsetX
+      $el.css 'cursor', if offset < width / 2 then 'w-resize' else 'e-resize'
+
+    $doc.on 'click', '.item-body-player-image', (event) ->
+      width = ($ event.currentTarget).width()
+      offset = event.offsetX
+      if offset < width / 2 then ui.bookNext() else ui.bookPrev()
+
+    return player
+
+  bookPrev: ->
+    $img = $ '.item-body-player-image'
+    src = $img.attr 'data-src'
+    page = parseInt $img.attr 'data-page'
+    return if page < 2
+    ui.bookJump src, page - 1
+
+  bookNext: ->
+    $img = $ '.item-body-player-image'
+    src = $img.attr 'data-src'
+    page = parseInt $img.attr 'data-page'
+    ui.bookJump src, page + 1
+
+  bookJump: (src, page) ->
+    $img = $ '.item-body-player-image'
+    if page isnt parseInt $img.attr 'data-page'
+      ui.progress on
+      $img.on 'load', -> ui.progress off
+      $img.attr 'src', "#{src}&page=#{page}"
+      $img.attr 'data-page', "#{page}"
+      ($ '.item-body-player-page').val page
 
   slideFade: ($el, makeVisible = no, callback = ->) ->
     if makeVisible
@@ -163,11 +232,9 @@ class ContentView extends Backbone.View
 
   events:
     'click .js-item-body-footer-action-fav': 'favContent'
-    'click .item-icon': 'navigateBrowseFile'
+    'click .item-icon': 'showPreviewScreen'
     'click .item-body-header-title': 'navigateBrowseFile'
     'click .item-body-header-series': 'navigateBrowseDir'
-    'mousemove .item-body-player-image': 'hoverImage'
-    'click .item-body-player-image': 'clickImage'
 
   initialize: ->
     @listenTo @model, 'change', @render
@@ -175,8 +242,9 @@ class ContentView extends Backbone.View
     unless @model.get 'player'
       @$el.html @template @model.toJSON()
     else
-      @$el.html @template _.extend @model.toJSON(),
-        media: "https://api.geta6.net/content/media?id=#{@model.get 'id'}"
+      json = @model.toJSON()
+      @$el.html @template _.extend json,
+        player: ui.playerTemplate json
       switch @model.get('type')
         when '.mp4', '.mp3'
           (@$ '.item-body-player-media').mediaelementplayer
@@ -243,42 +311,14 @@ class ContentView extends Backbone.View
     path[i] = encodeURIComponent p for p, i in path
     $app.navigate "/browse/#{path.join '/'}", yes
 
-  hoverImage: (event) ->
-    $el = $ event.currentTarget
-    width = $el.width()
-    offset = event.offsetX
-    if offset < width / 2
-      $el.css 'cursor', 'w-resize'
-    else
-      $el.css 'cursor', 'e-resize'
-
-  clickImage: (event) ->
-    width = ($ event.currentTarget).width()
-    offset = event.offsetX
-    if offset < width / 2 then @bookNext() else @bookPrev()
-
-  bookPrev: ->
-    $img = @$ '.item-body-player-image'
-    src = $img.attr 'data-src'
-    page = parseInt $img.attr 'data-page'
-    return if page < 2
-    @bookJump src, page - 1
-
-  bookNext: ->
-    $img = @$ '.item-body-player-image'
-    src = $img.attr 'data-src'
-    page = parseInt $img.attr 'data-page'
-    @bookJump src, page + 1
-
-  bookJump: (src, page) ->
-    $img = @$ '.item-body-player-image'
-    if page isnt parseInt $img.attr 'data-page'
-      ui.progress on
-      $img.on 'load', -> ui.progress off
-      $img.attr 'src', "#{src}&page=#{page}"
-      $img.attr 'data-page', "#{page}"
-      (@$ '.item-body-player-page').val page
-
+  showPreviewScreen: ->
+    unless @model.get 'player'
+      ui.preview @model.toJSON(),
+        accept: =>
+          path = (@model.get 'path').split '/'
+          path[i] = encodeURIComponent p for p, i in path
+          $app.navigate "/browse/#{path.join '/'}", yes
+        cancel: ->
 
 class Contents extends Backbone.Collection
 
@@ -458,8 +498,11 @@ class AccountView extends Backbone.View
     $app.navigate '/', yes
 
   dialogLogout: ->
-    ui.dialog 'Are you sure you want to log out?', =>
-      $app.navigate '/logout', yes
+    ui.dialog 'Are you sure you want to log out?',
+      accept: ->
+        $app.navigate '/logout', yes
+      cancel: ->
+        media.accountView.changetab media.accountView.pretab
 
   submitSearch: (event) ->
     event.preventDefault()
