@@ -140,39 +140,52 @@ ui =
 # Backbone::Content
 # ===================================
 
-class Player extends Backbone.Model
+class Content extends Backbone.Model
 
-class PlayerView extends Backbone.View
+  defaults:
+    player: no
+
+class ContentView extends Backbone.View
 
   tagName: 'div'
 
-  template: _.template ($ '#tmpl-player').html()
+  template: _.template ($ '#tmpl-content').html()
 
   events:
-    'click .image': 'clickImage'
-    'mousemove .image': 'hoverImage'
+    'mousemove .item-body-player-image': 'hoverImage'
+    'click .item-body-player-image': 'clickImage'
+    'click .item-icon': 'navigateBrowseFile'
     'click .item-body-header-title': 'navigateBrowseFile'
     'click .item-body-header-series': 'navigateBrowseDir'
-    'click .item-body-footer-save': 'navigateRawURL'
+
+  bindigns: {}
 
   initialize: ->
-    @$el.addClass 'item item-player'
+    @$el.addClass 'item'
 
   render: ->
-    @$el.html @template _.extend @model.toJSON(),
-      media: media = "https://api.geta6.net/content/media?id=#{@model.get 'id'}"
-      flash: "http://cdnjs.geta6.com/ajax/libs/mediaelement/2.11.3/js/flashmediaelement.swf"
-    switch @model.get 'type'
-      when '.mp4'
-        $el = @$ 'video'
-        $el.mediaelementplayer(enableAutosize: yes)
-      when '.mp3'
-        $el = @$ 'audio'
-        $el.mediaelementplayer(enableAutosize: yes)
+    console.log @model.toJSON()
+    unless @model.get 'player'
+      @$el.html @template @model.toJSON()
+    else
+      @$el.html @template _.extend @model.toJSON(),
+        media: "https://api.geta6.net/content/media?id=#{@model.get 'id'}"
+      switch @model.get('type')
+        when '.mp4', '.mp3'
+          (@$ '.item-body-player-media').mediaelementplayer
+            enableAutosize: on
+        when '.pdf'
+          $img = @$ '.item-body-player-image'
+          $page = @$ '.item-body-player-page'
+          $key = null
+          $page.on 'keyup', =>
+            clearTimeout $key
+            $key = setTimeout =>
+              src = $img.attr 'data-src'
+              page = parseInt $page.val()
+              @bookJump src, page
+            , 500
     return @
-
-  navigateRawURL: ->
-    window.location.href = "https://api.geta6.net/content/media?id=#{@model.get 'id'}"
 
   navigateBrowseDir: ->
     (path = (@model.get 'path').split '/').pop()
@@ -196,59 +209,29 @@ class PlayerView extends Backbone.View
   clickImage: (event) ->
     width = ($ event.currentTarget).width()
     offset = event.offsetX
-    if offset < width / 2 then @bookPrev() else @bookNext()
+    if offset < width / 2 then @bookNext() else @bookPrev()
 
   bookPrev: ->
-    $img = @$ '.image'
+    $img = @$ '.item-body-player-image'
     src = $img.attr 'data-src'
     page = parseInt $img.attr 'data-page'
     return if page < 2
-    $img.attr 'src', "#{src}&page=#{page - 1}"
-    $img.attr 'data-page', "#{page - 1}"
+    @bookJump src, page - 1
 
   bookNext: ->
-    $img = @$ '.image'
+    $img = @$ '.item-body-player-image'
     src = $img.attr 'data-src'
     page = parseInt $img.attr 'data-page'
-    $img.attr 'src', "#{src}&page=#{page + 1}"
-    $img.attr 'data-page', "#{page + 1}"
+    @bookJump src, page + 1
 
-
-# ===================================
-# Backbone::Content
-# ===================================
-
-class Content extends Backbone.Model
-
-class ContentView extends Backbone.View
-
-  tagName: 'div'
-
-  template: _.template ($ '#tmpl-content').html()
-
-  events:
-    'click .item-icon': 'navigateBrowseFile'
-    'click .item-body-header-title': 'navigateBrowseFile'
-    'click .item-body-header-series': 'navigateBrowseDir'
-
-  bindigns: {}
-
-  initialize: ->
-    @$el.addClass 'item'
-
-  render: ->
-    @$el.html @template @model.toJSON()
-    return @
-
-  navigateBrowseDir: ->
-    (path = (@model.get 'path').split '/').pop()
-    path[i] = encodeURIComponent p for p, i in path
-    $app.navigate "/browse/#{path.join '/'}", yes
-
-  navigateBrowseFile: ->
-    path = (@model.get 'path').split '/'
-    path[i] = encodeURIComponent p for p, i in path
-    $app.navigate "/browse/#{path.join '/'}", yes
+  bookJump: (src, page) ->
+    $img = @$ '.item-body-player-image'
+    if page isnt parseInt $img.attr 'data-page'
+      ui.progress on
+      $img.on 'load', -> ui.progress off
+      $img.attr 'src', "#{src}&page=#{page}"
+      $img.attr 'data-page', "#{page}"
+      (@$ '.item-body-player-page').val page
 
 
 class Contents extends Backbone.Collection
@@ -277,7 +260,6 @@ class ContentsView extends Backbone.View
   el: $ '#content'
 
   template: _.template ($ '#tmpl-contents').html()
-  template_player: _.template ($ '#tmpl-player').html()
 
   events:
     'click .js-item-stat-series': 'navigateTargetSeries'
@@ -288,7 +270,7 @@ class ContentsView extends Backbone.View
     @$el.html @template() # @collection.toJSON()
     @listenTo @collection, 'add', @append
     @listenTo @collection, 'reset', @clear
-    @listenTo @collection, 'inspect', @update
+    @listenTo @collection, 'inspect', @update # maually fired
     @listenTo media.account, 'change', @accountUpdate
     @accountUpdate()
 
@@ -304,22 +286,19 @@ class ContentsView extends Backbone.View
     for el, i in @$ '.js-item-order' when el = $ el
       if media.query.sort is el.attr 'data-order'
         el.addClass 'item-side-entry-active'
-        (@$ '.ui-selectbox-candidate').css top: -1 * i * el.height()
       else
         el.removeClass 'item-side-entry-active'
     (@$ '.js-item-order-place').html (@$ '.item-side-entry-active').html()
+    return @
 
   update: ->
-    data = @collection.inspect
-    @renderPlayer data.target if data.target? and data.target.type isnt 'd'
-    @renderSidebar()
-
-  renderPlayer: (data) ->
-    view = new PlayerView(model: new Player data).render()
-    (@$ '.item-main').append view.el
-
-  renderSidebar: ->
-    data = @collection.inspect
+    # player
+    if @collection.length is 0
+      if @collection.inspect.target?.type?
+        if @collection.inspect.target.type isnt 'd'
+          content = new Content _.extend @collection.inspect.target, player: yes
+          @collection.add content
+    # sidebar
     $el = @$ '.item-side'
     ($el.find '.js-item-stat').empty()
     hides = ['at', 'size', 'count', 'type', 'artist', 'series', 'track', 'disk']
@@ -329,16 +308,17 @@ class ContentsView extends Backbone.View
         shows.push key
         ($el.find ".js-item-stat-#{key} .js-item-stat").append val
     ui.slideFade ($el.find '.item-stat'), no, =>
-      if data.target?.id?
-        embed 'at', ui.datetime data.target.created
-        embed 'type', ui.typename data.target.type
-        if data.target.type is 'd'
-          embed 'count', data.match
+      if @collection.inspect.target?.id?
+        embed 'at', ui.datetime @collection.inspect.target.created
+        embed 'type', ui.typename @collection.inspect.target.type
+        if @collection.inspect.target.type is 'd'
+          embed 'count', @collection.inspect.match
         else
-          embed 'size', ui.filesize data.target.size
-          embed k, v for k, v of data.target.details
+          embed 'size', ui.filesize @collection.inspect.target.size
+          embed k, v for k, v of @collection.inspect.target.details
       else
-        embed 'count', data.match
+        embed 'at', ui.datetime new Date
+        embed 'count', @collection.inspect.match
       for show, i in shows
         if -1 < hides.indexOf show
           hides.splice (hides.indexOf show), 1
@@ -558,7 +538,7 @@ media =
     limit: storage.get('limit') || 25
     skip: 0
     sort: storage.get('sort') || '-time'
-    filter: storage.get('filter') || 'safe'
+    filter: storage.get('filter') || 'none'
 
 $win = $ window
 $doc = $ document

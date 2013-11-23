@@ -4,8 +4,8 @@ html
   head
     meta(charset='utf-8')
     title getumblr.
-    link(rel='stylesheet', href='//cdnjs.geta6.com/ajax/libs/twitter-bootstrap/3.0.0/css/bootstrap.min.css')
-    link(rel='stylesheet', href='//cdnjs.geta6.com/ajax/libs/mediaelement/2.11.3/css/mediaelementplayer.min.css')
+    link(rel='stylesheet', href='//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.0.0/css/bootstrap.min.css')
+    link(rel='stylesheet', href='//cdnjs.cloudflare.com/ajax/libs/mediaelement/2.11.3/css/mediaelementplayer.min.css')
     link(rel='stylesheet', href='/media.css')
 
   body
@@ -125,60 +125,49 @@ html
       .item-icon(style!='background-image:url(https://api.geta6.net/content/thumb?id=<%- id %>)')
       .item-body
         .item-body-header
-          span.item-body-header-title: a <%- details.title %>
+          .item-body-header-title: a <%- details.title %>
           .pull-right.item-body-header-series: a <%- details.series %>
         .item-body-player
-        .item-body-footer
-
-    script#tmpl-player(type='text/template')
-      .item-icon(style!='background-image:url(https://api.geta6.net/content/thumb?id=<%- id %>)')
-      .item-body
-        .item-body-header
-          span.item-body-header-title: a <%- details.title %>
-          .pull-right.item-body-header-series: a <%- details.series %>
-        .item-body-player
-          <% if (type == '.mp4') { %>
-          video(controls='controls', preload='none')
+          <% if (player) { if (type == '.mp4') { %>
+          video.item-body-player-media.item-body-player-video(controls='controls', preload='none')
             source(type='video/mp4', src!='<%- media %>')
-            object(type='application/x-shockwave-flash', data!='<%- flash %>')
-              param(name='movie', value!='<%- flash %>')
+            object(type='application/x-shockwave-flash', data='//cdnjs.cloudflare.com/ajax/libs/mediaelement/2.11.3/js/flashmediaelement.swf')
+              param(name='movie', value='//cdnjs.cloudflare.com/ajax/libs/mediaelement/2.11.3/js/flashmediaelement.swf')
               param(name='flashvars', value!='controls=true&file=<%- media %>')
           <% } else if (type == '.mp3') { %>
-          audio(controls='controls', preload='none')
+          audio.item-body-player-media.item-body-player-audio(controls='controls', preload='none')
             source(type='audio/mp3', src!='<%- media %>')
-            object(type='application/x-shockwave-flash', data!='<%- flash %>')
-              param(name='movie', value!='<%- flash %>')
+            object(type='application/x-shockwave-flash', data='//cdnjs.cloudflare.com/ajax/libs/mediaelement/2.11.3/js/flashmediaelement.swf')
+              param(name='movie', value='//cdnjs.cloudflare.com/ajax/libs/mediaelement/2.11.3/js/flashmediaelement.swf')
               param(name='flashvars', value!='controls=true&file=<%- media %>')
           <% } else if (type == '.pdf') { %>
-          img.image(src!='<%- media %>&page=1', data-src!='<%- media %>', data-page='1')
-          <% } %>
+          .form-group
+            input.form-control.item-body-player-page(value='1')
+          img.item-body-player-image(src!='<%- media %>&page=1', data-src!='<%- media %>', data-page='1')
+          <% } } %>
         .item-body-footer
-          a.pull-left.item-body-footer-icon.item-body-footer-save
-            .glyphicon.glyphicon-save
-          a.pull-right.item-body-footer-icon.item-body-footer-like
-            .glyphicon.glyphicon-heart
+          table: tr
+            td.item-body-footer-status
+              span <%- moment(created).fromNow() %>
+              <% var sum = view.length + fav.length %>
+              <% if (0 < sum) { %>
+              span <%- sum %> note<%- 1 < sum ? 's' : '' %>
+              <% } %>
+            td.item-body-footer-action
+              a(href='javascript:void(0)'): .glyphicon.glyphicon-retweet
+              a(href='javascript:void(0)'): .glyphicon.glyphicon-heart
+          .item-body-footer-notes
+            <% _.each(_.uniq(fav), function(id){ %>
+            img(src!='https://api.geta6.net/account/icon?id=<%- id %>')
+            <% }); %>
+            <% _.each(_.uniq(view), function(fav){ %>
+            img(src!='https://api.geta6.net/account/icon?id=<%- id %>')
+            <% }); %>
 
-    script(type='text/template')
-      <% if (type == '.mp4') { %>
-      video(controls='controls', preload='none')
-        source(type='video/mp4', src!='<%- media %>')
-        object(type='application/x-shockwave-flash', data!='<%- flash %>')
-          param(name='movie', value!='<%- flash %>')
-          param(name='flashvars', value!='controls=true&file=<%- media %>')
-      <% } else if (type == '.mp3') { %>
-      audio(controls='controls', preload='none')
-        source(type='audio/mp3', src!='<%- media %>')
-        object(type='application/x-shockwave-flash', data!='<%- flash %>')
-          param(name='movie', value!='<%- flash %>')
-          param(name='flashvars', value!='controls=true&file=<%- media %>')
-      <% } else if (type == '.pdf') { %>
-      img.image(src!='<%- media %>&page=1', data-src!='<%- media %>', data-page='1')
-      <% } %>
-
-    script(src='//cdnjs.geta6.com/ajax/libs/jquery/2.0.3/jquery.min.js')
-    script(src='//cdnjs.geta6.com/ajax/libs/underscore.js/1.5.2/underscore-min.js')
-    script(src='//cdnjs.geta6.com/ajax/libs/backbone.js/1.1.0/backbone-min.js')
-    script(src='//cdnjs.geta6.com/ajax/libs/moment.js/2.1.0/moment.min.js')
-    script(src='//cdnjs.geta6.com/ajax/libs/twitter-bootstrap/3.0.0/js/bootstrap.min.js')
-    script(src='//cdnjs.geta6.com/ajax/libs/mediaelement/2.11.3/js/mediaelement-and-player.min.js')
+    script(src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js')
+    script(src='//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js')
+    script(src='//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.0/backbone-min.js')
+    script(src='//cdnjs.cloudflare.com/ajax/libs/moment.js/2.1.0/moment.min.js')
+    script(src='//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.0.0/js/bootstrap.min.js')
+    script(src='//cdnjs.cloudflare.com/ajax/libs/mediaelement/2.11.3/js/mediaelement-and-player.min.js')
     script(src='/media.js')

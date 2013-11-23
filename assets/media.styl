@@ -265,7 +265,7 @@ table
     box-shadow inset 0 1px 3px rgba(0,0,0,0.36),0 1px 0 rgba(255,255,255,0.15)
   h1
     margin 0 0 15px 0
-    font-weight 500
+    font-weight 800
     font-size 36px
     color $color_br_focus
     text-shadow 1px 1px 0 rgba(0,0,0,0.32)
@@ -350,29 +350,53 @@ table
           &:hover
             color $color_dk_hover
         .item-body-header-title
+          display inline-block
           width 360px
           overflow ellipsis
         .item-body-header-series
+          display inline-block
           width 146px
           overflow ellipsis
           text-align right
 
       .item-body-player
         padding 0 20px 20px 20px
-        audio, video, .image
+        audio, video, .item-body-player-image
           width 100%
           max-width 100%
           min-width 100%
+          box-shadow 0 0 4px rgba(0, 0, 0, .12)
+        .item-body-player-page
+          text-align center
 
       .item-body-footer
-        padding 0 20px
-        height 44px
         background #F4F4F4
         border-radius 0 0 6px 6px
-        .item-body-footer-icon
-          width 44px
+        table
+          height 44px
+        td
+          padding 0
+          height 44px
           line-height 44px
+        td a
+          display inline-block
+          padding 0 20px
           text-align center
+          color $color_dk_sneak
+          &:hover
+            color $color_dk_hover
+        .item-body-footer-status
+          padding-left 20px
+          text-align left
+          span
+            padding-right 15px
+            font-weight 600
+            color $color_dk_sneak
+            &:hover
+              color $color_dk_hover
+        .item-body-footer-action
+          font-size 18px
+          text-align right
 
 
       // .item-body-dodger
