@@ -164,7 +164,6 @@ class ContentView extends Backbone.View
     @$el.addClass 'item'
 
   render: ->
-    console.log @model.toJSON()
     unless @model.get 'player'
       @$el.html @template @model.toJSON()
     else
@@ -538,7 +537,7 @@ media =
     limit: storage.get('limit') || 25
     skip: 0
     sort: storage.get('sort') || '-time'
-    filter: storage.get('filter') || 'none'
+    filter: storage.get('filter') || 'safe'
 
 $win = $ window
 $doc = $ document
