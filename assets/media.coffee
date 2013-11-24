@@ -47,20 +47,41 @@ $api =
 # ===================================
 
 ui =
+
+  _platforms: [
+    { p: 'platform', reg: /iphone/i, id: 'iphone' },
+    { p: 'platform', reg: /ipod/i, id: 'ipod' },
+    { p: 'userAgent', reg: /ipad/i, id: 'ipad' },
+    { p: 'userAgent', reg: /blackberry/i, id: 'blackberry' },
+    { p: 'userAgent', reg: /android/i, id: 'android' },
+    { p: 'platform', reg: /mac/i, id: 'mac' },
+    { p: 'platform', reg: /win/i, id: 'windows' },
+    { p: 'platform', reg: /linux/i, id: 'linux' }
+  ]
+
+  _ua: null
+
+  ua: ->
+    return ui._ua if ui._ua isnt null
+    for platform in ui._platforms
+      if platform.reg.test window.navigator[platform.p]
+        return ui._ua = platform.id
+
   animationTime: 240
 
   _dialogDriver: ($el, callback = {}) ->
     callback.accept or= ->
     callback.cancel or= ->
     $el.css 'visibility', 'visible'
-    $box = $el.find('.ui-dialog-keydriver').focus()
-    $box.on 'blur keyup', (event) ->
-      $box.focus()
-      if event?.keyCode?
-        if event.keyCode is 27
-          $el.find('.btn-default').trigger 'click'
-        if event.keyCode is 13
-          $el.find('.btn-primary').trigger 'click'
+    $box = $el.find('.ui-dialog-keydriver')
+    if /(mac|windows|linux)/i.test ui.ua()
+      $box.focus().on 'blur keyup', (event) ->
+        $box.focus()
+        if event?.keyCode?
+          if event.keyCode is 27
+            $el.find('.btn-default').trigger 'click'
+          if event.keyCode is 13
+            $el.find('.btn-primary').trigger 'click'
     $el.find('.btn-primary').one 'click', ->
       $box.off 'blur keyup'
       $el.css 'visibility', 'hidden'
