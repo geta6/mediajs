@@ -71,12 +71,15 @@ html
                 tr: td.item-side-entry.js-item-stat-type
                   span Type
                   .pull-right.js-item-stat
-                tr: td.item-side-entry.js-item-stat-artist
-                  span Artist
-                  .pull-right.js-item-stat.item-stat-clickable
                 tr: td.item-side-entry.js-item-stat-series
                   span Series
                   .pull-right.js-item-stat.item-stat-clickable
+                tr: td.item-side-entry.js-item-stat-director
+                  span Director
+                  .pull-right.js-item-stat.item-stat-clickable
+                tr: td.item-side-entry.js-item-stat-artist
+                  span Artist
+                  .pull-right.js-item-stat
                 tr: td.item-side-entry.js-item-stat-track
                   span Track
                   .pull-right.js-item-stat
@@ -134,7 +137,7 @@ html
             .glyphicon.glyphicon-folder-open
             <% } %>
           a.item-body-header-title
-            span <%- ('000' + details.track).slice(-3) %>
+            span <%- details.track ? ('000' + details.track).slice(-3) : '' %>
             span &nbsp;
             span <%- details.title || details.series %>
           a.pull-right.item-body-header-series

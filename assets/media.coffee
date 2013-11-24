@@ -332,7 +332,7 @@ class ContentsView extends Backbone.View
 
   events:
     'click .js-item-stat-series': 'navigateTargetSeries'
-    'click .js-item-stat-artist': 'navigateTargetArtist'
+    'click .js-item-stat-director': 'navigateTargetDirector'
     'click .js-item-order': 'changeOrder'
 
   initialize: (@collection) ->
@@ -370,7 +370,7 @@ class ContentsView extends Backbone.View
     # sidebar
     $el = @$ '.item-side'
     ($el.find '.js-item-stat').empty()
-    hides = ['at', 'size', 'count', 'type', 'artist', 'series', 'track', 'disk']
+    hides = ['at', 'size', 'count', 'type', 'artist', 'series', 'director', 'track', 'disc']
     shows = []
     embed = (key, val) ->
       unless val is null
@@ -406,8 +406,9 @@ class ContentsView extends Backbone.View
   navigateTargetSeries: ->
     $app.navigate "/browse/#{@collection.inspect.target.parent}", yes
 
-  navigateTargetArtist: ->
-    $app.navigate "/browse/Music/#{@collection.inspect.target.details.artist}", yes
+  navigateTargetDirector: ->
+    if @collection.inspect.target.type is '.mp3'
+      $app.navigate "/browse/Music/#{@collection.inspect.target.details.director}", yes
 
   changeOrder: (event) ->
     sort = ($ event.currentTarget).attr 'data-order'
