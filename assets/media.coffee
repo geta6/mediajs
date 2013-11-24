@@ -6,13 +6,13 @@
 
 $api =
   account: ->
-    return $.ajax 'https://api.geta6.net/account/me.json',
+    return $.ajax '//api.geta6.net/account/me.json',
       type: 'GET'
       dataType: 'jsonp'
       beforeSend: ->
 
   search: (data = {}) ->
-    return $.ajax 'https://api.geta6.net/content/search.json',
+    return $.ajax '//api.geta6.net/content/search.json',
       type: 'GET'
       data: data
       dataType: 'jsonp'
@@ -20,7 +20,7 @@ $api =
 
   browse: (data = {}) ->
     throw new Error 'no q' unless data.q
-    return $.ajax 'https://api.geta6.net/content/browse.json',
+    return $.ajax '//api.geta6.net/content/browse.json',
       type: 'GET'
       data: data
       dataType: 'jsonp'
@@ -28,7 +28,7 @@ $api =
 
   favorite: (id) ->
     throw new Error 'no id' unless id
-    return $.ajax 'https://api.geta6.net/account/fav/create.json',
+    return $.ajax '//api.geta6.net/account/fav/create.json',
       type: 'GET'
       data: id: id
       dataType: 'jsonp'
@@ -36,7 +36,7 @@ $api =
 
   unfavorite: (id) ->
     throw new Error 'no id' unless id
-    return $.ajax 'https://api.geta6.net/account/fav/delete.json',
+    return $.ajax '//api.geta6.net/account/fav/delete.json',
       type: 'GET'
       data: id: id
       dataType: 'jsonp'
@@ -76,26 +76,6 @@ ui =
     $el.find('p').text message
     ui._dialogDriver $el, callback
 
-  preview: (object, callback) ->
-    $el = $ '#ui-preview'
-    $el.find('p').html ui.playerTemplate object
-    ui._dialogDriver $el, callback
-    switch object.type
-      when '.mp4', '.mp3'
-        $el.find('.item-body-player-media').mediaelementplayer
-          enableAutosize: on
-      when '.pdf'
-        $img = $el.find '.item-body-player-image'
-        $page = $el.find '.item-body-player-page'
-        $key = null
-        $page.on 'keyup', =>
-          clearTimeout $key
-          $key = setTimeout =>
-            src = $img.attr 'data-src'
-            page = parseInt $page.val()
-            @bookJump src, page
-          , 500
-
   spinner: (active = no) ->
     if active
       ($ '.ui-spinner').addClass 'ui-spinner-active'
@@ -113,27 +93,6 @@ ui =
         top: -1 * $progress.height()
       , ui.animationTime, ->
         $progress.removeClass 'ui-progress-active'
-
-  _playerTemplate: null
-  playerTemplate: ->
-    if ui._playerTemplate is null
-      ui._playerTemplate = _.template ($ '#tmpl-player').html()
-
-    player = ui._playerTemplate.apply window, arguments
-
-    ($ '.item-body-player-image').off 'click mousemove'
-    $doc.on 'mousemove', '.item-body-player-image', (event) ->
-      $el = $ event.currentTarget
-      width = $el.width()
-      offset = event.offsetX
-      $el.css 'cursor', if offset < width / 2 then 'w-resize' else 'e-resize'
-
-    $doc.on 'click', '.item-body-player-image', (event) ->
-      width = ($ event.currentTarget).width()
-      offset = event.offsetX
-      if offset < width / 2 then ui.bookNext() else ui.bookPrev()
-
-    return player
 
   bookPrev: ->
     $img = $ '.item-body-player-image'
@@ -232,9 +191,11 @@ class ContentView extends Backbone.View
 
   events:
     'click .js-item-body-footer-action-fav': 'favContent'
-    'click .item-icon': 'showPreviewScreen'
+    'click .item-icon': 'navigateBrowseFile'
     'click .item-body-header-title': 'navigateBrowseFile'
     'click .item-body-header-series': 'navigateBrowseDir'
+    'mousemove .item-body-player-image': 'hoverImage'
+    'click .item-body-player-image': 'jumpImage'
 
   initialize: ->
     @listenTo @model, 'change', @render
@@ -243,12 +204,11 @@ class ContentView extends Backbone.View
       @$el.html @template @model.toJSON()
     else
       json = @model.toJSON()
-      @$el.html @template _.extend json,
-        player: ui.playerTemplate json
+      @$el.html @template _.extend json, player: yes
       switch @model.get('type')
-        when '.mp4', '.mp3'
-          (@$ '.item-body-player-media').mediaelementplayer
-            enableAutosize: on
+        # when '.mp4', '.mp3'
+        #   (@$ '.item-body-player-media').mediaelementplayer
+        #     enableAutosize: on
         when '.pdf'
           $img = @$ '.item-body-player-image'
           $page = @$ '.item-body-player-page'
@@ -280,7 +240,7 @@ class ContentView extends Backbone.View
       for fav in _.uniq @model.get 'fav'
         notes.append ($ '<div>')
           .addClass('item-body-footer-notes-note').text("liked this")
-          .css('background-image', "url(https://api.geta6.net/account/icon?id=#{fav})")
+          .css('background-image', "url(//api.geta6.net/account/icon?id=#{fav})")
     return @
 
   favContent: ->
@@ -294,7 +254,6 @@ class ContentView extends Backbone.View
         .then =>
           fav.splice (fav.indexOf me), 1
           @model.set { isfav: no, fav: fav }
-          console.log @model.toJSON()
     else
       $.when($api.favorite @model.get 'id')
         .then =>
@@ -311,14 +270,17 @@ class ContentView extends Backbone.View
     path[i] = encodeURIComponent p for p, i in path
     $app.navigate "/browse/#{path.join '/'}", yes
 
-  showPreviewScreen: ->
-    unless @model.get 'player'
-      ui.preview @model.toJSON(),
-        accept: =>
-          path = (@model.get 'path').split '/'
-          path[i] = encodeURIComponent p for p, i in path
-          $app.navigate "/browse/#{path.join '/'}", yes
-        cancel: ->
+  hoverImage: (event) ->
+    $el = $ event.currentTarget
+    width = $el.width()
+    offset = event.offsetX
+    $el.css 'cursor', if offset < width / 2 then 'w-resize' else 'e-resize'
+
+  jumpImage: (event) ->
+    width = ($ event.currentTarget).width()
+    offset = event.offsetX
+    if offset < width / 2 then ui.bookNext() else ui.bookPrev()
+
 
 class Contents extends Backbone.Collection
 
@@ -581,7 +543,7 @@ class Application extends Backbone.Router
     callback = ($ '<input>').attr('name', 'callback').val(callback)
     form = ($ '<form>')
       .attr('method', 'post')
-      .attr('action', 'https://api.geta6.net/session/delete')
+      .attr('action', '//api.geta6.net/session/delete')
       .append(callback)
     form.submit()
 

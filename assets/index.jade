@@ -4,7 +4,6 @@ html
     meta(charset='utf-8')
     title getumblr.
     link(rel='stylesheet', href='//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.0.0/css/bootstrap.min.css')
-    link(rel='stylesheet', href='//cdnjs.cloudflare.com/ajax/libs/mediaelement/2.11.3/css/mediaelementplayer.min.css')
     link(rel='stylesheet', href='/media.css')
 
   body
@@ -26,19 +25,11 @@ html
 
     #ui-config.ui-config.ui-config-opaque: table: tr: td
 
-    #ui-preview.ui-dialog.ui-dialog-opaque: table: tr: td
-      .ui-dialog-container
-        input.ui-dialog-keydriver
-        .ui-dialog-message: p
-        .ui-dialog-control
-          button.ui-dialog-button.btn.btn-sm.btn-default Close
-          button.ui-dialog-button.btn.btn-sm.btn-primary View
-
     script#tmpl-account(type='text/template')
       <% if (callback) { %>
-      .ui-dialog.ui-dialog-lock(style='visibility:visible;background-image:url(http://mogashi.no-ip.org/alice)')
+      .ui-dialog.ui-dialog-lock(style='visibility:visible;background-image:url(//mogashi.no-ip.org/alice)')
         table#auth: tr: td
-          form(method='POST', action='https://api.geta6.net/session/create')
+          form(method='POST', action='//api.geta6.net/session/create')
             h1 getumblr.
             input(type='hidden', name='callback', value!='<%- callback %>')
             .form-group
@@ -129,7 +120,7 @@ html
           //-       .pull-right.js-item-user.js-item-user-name
 
     script#tmpl-content(type='text/template')
-      .item-icon(style!='background-image:url(https://api.geta6.net/content/thumb?id=<%- id %>)')
+      .item-icon(style!='background-image:url(//api.geta6.net/content/thumb?id=<%- id %>)')
       .item-body
         .item-body-header
           a.item-body-header-icon
@@ -145,11 +136,28 @@ html
           a.item-body-header-title
             span <%- ('000' + details.track).slice(-3) %>
             span &nbsp;
-            span <%- details.title %>
+            span <%- details.title || details.series %>
           a.pull-right.item-body-header-series
             span <%- details.series %>
         .item-body-player
-          <% if (player) { print(player) } %>
+          .item-body-player-container
+            <% if (player) { if (type == '.mp4') { %>
+            video.item-body-player-media.item-body-player-video(controls='controls', preload='none')
+              source(type='video/mp4', src!='//api.geta6.net/content/media?id=<%- id %>')
+              object(type='application/x-shockwave-flash', data='//cdnjs.cloudflare.com/ajax/libs/mediaelement/2.11.3/js/flashmediaelement.swf')
+                param(name='movie', value='//cdnjs.cloudflare.com/ajax/libs/mediaelement/2.11.3/js/flashmediaelement.swf')
+                param(name='flashvars', value!='controls=true&file=//api.geta6.net/content/media?id=<%- id %>')
+            <% } else if (type == '.mp3') { %>
+            audio.item-body-player-media.item-body-player-audio(controls='controls', preload='none')
+              source(type='audio/mp3', src!='//api.geta6.net/content/media?id=<%- id %>')
+              object(type='application/x-shockwave-flash', data='//cdnjs.cloudflare.com/ajax/libs/mediaelement/2.11.3/js/flashmediaelement.swf')
+                param(name='movie', value='//cdnjs.cloudflare.com/ajax/libs/mediaelement/2.11.3/js/flashmediaelement.swf')
+                param(name='flashvars', value!='controls=true&file=//api.geta6.net/content/media?id=<%- id %>')
+            <% } else if (type == '.pdf') { %>
+            .form-group
+              input.form-control.item-body-player-page(value='1')
+            img.item-body-player-image(src!='//api.geta6.net/content/media?id=<%- id %>&page=1', data-src!='//api.geta6.net/content/media?id=<%- id %>', data-page='1')
+            <% } } %>
         .item-body-footer
           table: tr
             td.item-body-footer-status
@@ -161,31 +169,9 @@ html
               a(href='javascript:void(0)'): .js-item-body-footer-action-fav.glyphicon.glyphicon-heart
               <% } %>
 
-    script#tmpl-player(type='text/template')
-      .item-body-player-container
-        <% if (type == '.mp4') { %>
-        video.item-body-player-media.item-body-player-video(controls='controls', preload='none')
-          source(type='video/mp4', src!='https://api.geta6.net/content/media?id=<%- id %>')
-          object(type='application/x-shockwave-flash', data='//cdnjs.cloudflare.com/ajax/libs/mediaelement/2.11.3/js/flashmediaelement.swf')
-            param(name='movie', value='//cdnjs.cloudflare.com/ajax/libs/mediaelement/2.11.3/js/flashmediaelement.swf')
-            param(name='flashvars', value!='controls=true&file=https://api.geta6.net/content/media?id=<%- id %>')
-        <% } else if (type == '.mp3') { %>
-        audio.item-body-player-media.item-body-player-audio(controls='controls', preload='none')
-          source(type='audio/mp3', src!='https://api.geta6.net/content/media?id=<%- id %>')
-          object(type='application/x-shockwave-flash', data='//cdnjs.cloudflare.com/ajax/libs/mediaelement/2.11.3/js/flashmediaelement.swf')
-            param(name='movie', value='//cdnjs.cloudflare.com/ajax/libs/mediaelement/2.11.3/js/flashmediaelement.swf')
-            param(name='flashvars', value!='controls=true&file=https://api.geta6.net/content/media?id=<%- id %>')
-        <% } else if (type == '.pdf') { %>
-        .form-group
-          input.form-control.item-body-player-page(value='1')
-        img.item-body-player-image(src!='https://api.geta6.net/content/media?id=<%- id %>&page=1', data-src!='https://api.geta6.net/content/media?id=<%- id %>', data-page='1')
-        <% } %>
-
-
     script(src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js')
     script(src='//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js')
     script(src='//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.0/backbone-min.js')
     script(src='//cdnjs.cloudflare.com/ajax/libs/moment.js/2.1.0/moment.min.js')
     script(src='//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.0.0/js/bootstrap.min.js')
-    script(src='//cdnjs.cloudflare.com/ajax/libs/mediaelement/2.11.3/js/mediaelement-and-player.min.js')
     script(src='/media.js')

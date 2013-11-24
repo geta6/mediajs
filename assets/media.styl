@@ -467,26 +467,6 @@ table
               border-width 12px
               border-color transparent $color_br_focus transparent transparent
 
-
-      // .item-body-dodger
-      //   display none
-      //   position absolute
-      //   top 0
-      //   right 0
-      //   background $color_dk_sneak
-      //   width 12px
-      //   height 12px
-      //   border-radius 0 0 0 6px
-      //   cursor pointer
-      //   &:after
-      //     content ' '
-      //     display block
-      //     width 0
-      //     height 0
-      //     border-style solid
-      //     border-width 0 12px 12px 0
-      //     border-color: transparent $color_bg transparent transparent;
-
   .item-side
     position relative
     width 250px
@@ -524,6 +504,8 @@ table
     //   border-bottom none
 
     .item-side-entry
+      padding 0 5px
+      height 35px
       span
         width 50px
         overflow ellipsis
@@ -537,15 +519,11 @@ table
           color $color_br_hover
 
     th.item-side-entry
-      padding 0 5px
-      height 42px
       font-weight 500
-      border-bottom 2px solid $color_br_light
       vertical-align bottom
+      border-bottom 2px solid $color_br_light
 
     td.item-side-entry
-      padding 0 5px
-      height 35px
       line-height 35px
       vertical-align middle
       border-bottom 1px solid $color_br_light
