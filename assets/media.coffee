@@ -1,6 +1,13 @@
 'use strict'
 
 # ===================================
+# Globals
+# ===================================
+
+$win = $ window
+$doc = $ document
+
+# ===================================
 # API
 # ===================================
 
@@ -195,6 +202,22 @@ ui =
         when '.js-item-order-name-asc' then '+name'
         when '.js-item-order-name-dsc' then '-name'
 
+
+# ===================================
+# LocalStorage
+# ===================================
+
+storage =
+  get: (key) ->
+    if window.localStorage?
+      return window.localStorage.getItem key
+    return no
+  set: (key, val) ->
+    if window.localStorage?
+      return window.localStorage.setItem key, val
+    return no
+
+
 # ===================================
 # Backbone::Content
 # ===================================
@@ -222,25 +245,19 @@ class ContentView extends Backbone.View
     @listenTo @model, 'change', @render
     @$el.addClass 'item'
     unless @model.get 'player'
-      @$el.html @template @model.toJSON()
-    else
-      json = @model.toJSON()
-      @$el.html @template _.extend json, player: yes
-      switch @model.get('type')
-        # when '.mp4', '.mp3'
-        #   (@$ '.item-body-player-media').mediaelementplayer
-        #     enableAutosize: on
-        when '.pdf'
-          $img = @$ '.item-body-player-image'
-          $page = @$ '.item-body-player-page'
-          $key = null
-          $page.on 'keyup', =>
-            clearTimeout $key
-            $key = setTimeout =>
-              src = $img.attr 'data-src'
-              page = parseInt $page.val()
-              @bookJump src, page
-            , 500
+      return @$el.html @template @model.toJSON()
+    @$el.html @template _.extend @model.toJSON(), player: yes
+    if '.pdf' is @model.get('type')
+      $img = @$ '.item-body-player-image'
+      $page = @$ '.item-body-player-page'
+      $key = null
+      $page.on 'keyup', =>
+        clearTimeout $key
+        $key = setTimeout =>
+          src = $img.attr 'data-src'
+          page = parseInt $page.val()
+          ui.bookJump src, page
+        , 500
 
   render: ->
     if @model.get 'isfav'
@@ -252,23 +269,22 @@ class ContentView extends Backbone.View
     view = @model.get 'view'
     sum = fav.length + view.length
     if 0 < sum
-      stats.text("#{sum} note#{if 1 < sum then 's' else ''}")
+      stats.text "#{sum} note#{if 1 < sum then 's' else ''}"
     stats.append ($ '<div>')
       .addClass('item-body-footer-notes')
-      .append notes = ($ '<div>')
-        .addClass 'item-body-footer-notes-inside'
+      .append notes = ($ '<div>').addClass 'item-body-footer-notes-inside'
     if 0 < fav.length
       for fav in _.uniq @model.get 'fav'
         notes.append ($ '<div>')
           .addClass('item-body-footer-notes-note').text("liked this")
-          .css('background-image', "url(//api.geta6.net/account/icon?id=#{fav})")
+          .css 'background-image', "url(//api.geta6.net/account/icon?id=#{fav})"
     if 0 < view.length
       notes.append ($ '<div>')
-        .addClass('item-body-footer-notes-note').text("#{view.length} view#{if 1 < view.length then 's' else ''}")
+        .addClass('item-body-footer-notes-note')
+        .text "#{view.length} view#{if 1 < view.length then 's' else ''}"
     return @
 
   favContent: ->
-    me = media.account.get 'id'
     fav = @model.get 'fav'
     (@$ '.js-item-body-footer-action-fav').toggleClass 'ui-colored'
     if @model.get 'isfav'
@@ -276,12 +292,12 @@ class ContentView extends Backbone.View
         .fail =>
           console.log 'fail'
         .then =>
-          fav.splice (fav.indexOf me), 1
+          fav.splice (fav.indexOf media.account.get 'id'), 1
           @model.set { isfav: no, fav: fav }
     else
       $.when($api.favorite @model.get 'id')
         .then =>
-          fav.unshift me
+          fav.unshift media.account.get 'id'
           @model.set { isfav: yes, fav: fav }
 
   navigateBrowseDir: ->
@@ -437,6 +453,7 @@ class ContentsView extends Backbone.View
     @$el.find('.js-item-user-icon').css 'background-image', "url(#{media.account.get 'icon'})"
     @$el.find('.js-item-user-name').text media.account.get 'name'
 
+
 # ===================================
 # Backbone::Account
 # ===================================
@@ -591,17 +608,6 @@ class Application extends Backbone.Router
   index: ->
     @search ''
 
-# from localstorage
-storage =
-  get: (key) ->
-    if window.localStorage?
-      return window.localStorage.getItem key
-    return no
-  set: (key, val) ->
-    if window.localStorage?
-      return window.localStorage.setItem key, val
-    return no
-
 media =
   account: new Account
   content: new Content
@@ -615,8 +621,6 @@ media =
     sort: storage.get('sort') || '-time'
     filter: storage.get('filter') || 'none'
 
-$win = $ window
-$doc = $ document
 $app = new Application()
 
 $win.on 'resize scroll', (event) ->
