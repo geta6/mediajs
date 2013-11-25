@@ -26,7 +26,6 @@ $api =
       beforeSend: ->
 
   browse: (data = {}) ->
-    throw new Error 'no q' unless data.q
     return $.ajax '//api.geta6.net/content/browse.json',
       type: 'GET'
       data: data
@@ -244,8 +243,10 @@ class ContentView extends Backbone.View
   initialize: ->
     @listenTo @model, 'change', @render
     @$el.addClass 'item'
+
     unless @model.get 'player'
       return @$el.html @template @model.toJSON()
+
     @$el.html @template _.extend @model.toJSON(), player: yes
     if '.pdf' is @model.get('type')
       $img = @$ '.item-body-player-image'
@@ -301,9 +302,7 @@ class ContentView extends Backbone.View
           @model.set { isfav: yes, fav: fav }
 
   navigateBrowseDir: ->
-    (path = (@model.get 'path').split '/').pop()
-    path[i] = encodeURIComponent p for p, i in path
-    $app.navigate "/browse/#{path.join '/'}", yes
+    $app.navigate "/browse/#{@model.get 'parent'}", yes
 
   navigateBrowseFile: ->
     path = (@model.get 'path').split '/'
@@ -401,6 +400,7 @@ class ContentsView extends Backbone.View
         embed 'type', ui.typename @collection.inspect.target.type
         if @collection.inspect.target.type is 'd'
           embed 'count', @collection.inspect.match
+          embed 'series', @collection.inspect.target.details.series || 'media'
         else
           embed 'size', ui.filesize @collection.inspect.target.size
           embed k, v for k, v of @collection.inspect.target.details
