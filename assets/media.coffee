@@ -253,15 +253,18 @@ class ContentView extends Backbone.View
     sum = fav.length + view.length
     if 0 < sum
       stats.text("#{sum} note#{if 1 < sum then 's' else ''}")
+    stats.append ($ '<div>')
+      .addClass('item-body-footer-notes')
+      .append notes = ($ '<div>')
+        .addClass 'item-body-footer-notes-inside'
     if 0 < fav.length
-      stats.append ($ '<div>')
-        .addClass('item-body-footer-notes')
-        .append notes = ($ '<div>')
-          .addClass 'item-body-footer-notes-inside'
       for fav in _.uniq @model.get 'fav'
         notes.append ($ '<div>')
           .addClass('item-body-footer-notes-note').text("liked this")
           .css('background-image', "url(//api.geta6.net/account/icon?id=#{fav})")
+    if 0 < view.length
+      notes.append ($ '<div>')
+        .addClass('item-body-footer-notes-note').text("#{view.length} view#{if 1 < view.length then 's' else ''}")
     return @
 
   favContent: ->
