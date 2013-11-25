@@ -610,7 +610,7 @@ media =
     limit: storage.get('limit') || 25
     skip: 0
     sort: storage.get('sort') || '-time'
-    filter: storage.get('filter') || 'safe'
+    filter: storage.get('filter') || 'none'
 
 $win = $ window
 $doc = $ document
