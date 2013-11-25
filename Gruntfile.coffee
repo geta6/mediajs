@@ -80,6 +80,7 @@ module.exports = (grunt) ->
       debug:
         options:
           pretty: yes
+          data: version: '<%- pkg.version %>'
         files: [{
           expand: yes
           cwd: 'assets/'
@@ -88,6 +89,8 @@ module.exports = (grunt) ->
           ext: '.html'
         }]
       release:
+        options:
+          data: version: '<%- pkg.version %>'
         files: [{
           expand: yes
           cwd: 'assets/'
