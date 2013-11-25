@@ -139,9 +139,9 @@ html
           a.item-body-header-title
             span <%- details.track ? ('000' + details.track).slice(-3) : '' %>
             span &nbsp;
-            span <%- details.title || details.series %>
+            span <%- details.title || details.series || path.split('/').pop().replace(/\.(mp4|mp3|pdf)/, '') %>
           a.pull-right.item-body-header-series
-            span <%- details.series %>
+            span <%- details.series || parent %>
         .item-body-player
           .item-body-player-container
             <% if (player) { if (type == '.mp4') { %>

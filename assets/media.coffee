@@ -610,7 +610,6 @@ class Application extends Backbone.Router
 
 media =
   account: new Account
-  content: new Content
   contents: new Contents
   accountView: null
   contentsView: null
