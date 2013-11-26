@@ -7,6 +7,7 @@ html
     link(rel='stylesheet', href='/media.css')
 
   body
+
     .ui-progress
       .progress.progress-striped
         .progress-bar
@@ -129,16 +130,11 @@ html
                   .pull-left: a(href='//github.com/geta6/mediajs') mediajs
                   .pull-right= version
 
-          //- .item-play
-          //-   table
-          //-     tr: td.item-side-entry
-          //-       .pull-left.item-user-icon.js-item-user-icon
-          //-       .pull-right.js-item-user.js-item-user-name
-
     script#tmpl-content(type='text/template')
       .item-icon(style!='background-image:url(//api.geta6.net/content/thumb?id=<%- id %>)')
       .item-body
         .item-body-header
+          .item-body-unviewed-marker
           a.item-body-header-icon
             <% if (type == '.mp3') { %>
             .glyphicon.glyphicon-music
@@ -172,7 +168,7 @@ html
             <% } else if (type == '.pdf') { %>
             .form-group
               input.form-control.item-body-player-page(value='1')
-            img.item-body-player-image(src!='//api.geta6.net/content/media?id=<%- id %>&page=1', data-src!='//api.geta6.net/content/media?id=<%- id %>', data-page='1')
+            img.item-body-player-media.item-body-player-image(src!='//api.geta6.net/content/media?id=<%- id %>&page=1', data-src!='//api.geta6.net/content/media?id=<%- id %>', data-page='1')
             <% } } %>
         .item-body-footer
           table: tr

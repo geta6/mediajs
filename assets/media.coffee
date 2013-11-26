@@ -230,7 +230,6 @@ storage =
       return window.localStorage.setItem key, val
     return no
 
-
 # ===================================
 # Backbone::Content
 # ===================================
@@ -247,6 +246,8 @@ class ContentView extends Backbone.View
   template: _.template ($ '#tmpl-content').html()
 
   events:
+    # 'load .item-body-player-media': 'viewContent'
+    # 'play .item-body-player-media': 'viewContent'
     'click .js-item-body-footer-action-fav': 'favContent'
     'click .item-icon': 'navigateBrowseFile'
     'click .item-body-header-title': 'navigateBrowseFile'
@@ -262,7 +263,12 @@ class ContentView extends Backbone.View
       return @$el.html @template @model.toJSON()
 
     @$el.html @template _.extend @model.toJSON(), player: yes
-    if '.pdf' is @model.get('type')
+
+    (@$ '.item-body-player-media').one 'load play', (event) =>
+      console.log event.type
+      @viewContent event
+
+    if '.pdf' is @model.get 'type'
       $img = @$ '.item-body-player-image'
       $page = @$ '.item-body-player-page'
       $key = null
@@ -283,6 +289,8 @@ class ContentView extends Backbone.View
     fav = @model.get 'fav'
     view = @model.get 'view'
     sum = fav.length + view.length
+    if (media.account.get 'id') in view
+      (@$ '.item-body-unviewed-marker').remove()
     if 0 < sum
       stats.text "#{sum} note#{if 1 < sum then 's' else ''}"
     stats.append ($ '<div>')
@@ -298,6 +306,12 @@ class ContentView extends Backbone.View
         .addClass('item-body-footer-notes-note')
         .text "#{view.length} view#{if 1 < view.length then 's' else ''}"
     return @
+
+  viewContent: (event) ->
+    view = @model.get 'view'
+    view.push media.account.get 'id'
+    @model.set 'view', view
+    @model.trigger 'change'
 
   favContent: ->
     fav = @model.get 'fav'
