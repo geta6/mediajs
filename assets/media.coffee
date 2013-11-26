@@ -54,7 +54,7 @@ $api =
 
 ui =
 
-  _platforms: [
+  _pl: [
     { p: 'platform', reg: /iphone/i, id: 'iphone' },
     { p: 'platform', reg: /ipod/i, id: 'ipod' },
     { p: 'userAgent', reg: /ipad/i, id: 'ipad' },
@@ -69,15 +69,13 @@ ui =
 
   ua: ->
     return ui._ua if ui._ua isnt null
-    for platform in ui._platforms
-      if platform.reg.test window.navigator[platform.p]
-        return ui._ua = platform.id
+    return ui._ua = p.id for p in ui._pl when p.reg.test window.navigator[p.p]
 
   animationTime: 240
 
-  _dialogDriver: ($el, callback = {}) ->
-    callback.accept or= ->
-    callback.cancel or= ->
+  _dialogDriver: ($el, callbacks = {}) ->
+    callbacks.accept or= ->
+    callbacks.cancel or= ->
     $el.css 'visibility', 'visible'
     $box = $el.find('.ui-dialog-keydriver')
     if /(mac|windows|linux)/i.test ui.ua()
@@ -91,17 +89,33 @@ ui =
     $el.find('.btn-primary').one 'click', ->
       $box.off 'blur keyup'
       $el.css 'visibility', 'hidden'
-      callback.accept()
+      callbacks.accept()
     $el.find('.btn-default').one 'click', ->
       $box.off 'blur keyup'
       $el.css 'visibility', 'hidden'
-      callback.cancel()
+      callbacks.cancel()
 
-  dialog: (message, callback) ->
+  config: (entries = {}, callbacks = {}) ->
+    callbacks.accept or= ->
+    callbacks.cancel or= ->
+    media.accountView.changetab 'conf'
+    $el = $ '#ui-config'
+    content = $el.find('.ui-dialog-message table').empty()
+    for message, param of entries
+      (row = $ '<tr>').append ($ '<td>').text(message)
+      row.append ($ '<td>').append box = ($ '<input>')
+        .attr(id: param.id, type: param.type).val(param.value)
+      box.attr 'checked', param.value if param.type is 'checkbox'
+      content.append row
+    ui._dialogDriver $el, callbacks
+
+  dialog: (message = '', callbacks = {}) ->
+    callbacks.accept or= ->
+    callbacks.cancel or= ->
     media.accountView.changetab 'logout'
     $el = $ '#ui-dialog'
     $el.find('p').text message
-    ui._dialogDriver $el, callback
+    ui._dialogDriver $el, callbacks
 
   spinner: (active = no) ->
     if active
@@ -478,7 +492,7 @@ class AccountView extends Backbone.View
     'click .js-navi-home': 'backToIndex'
     'click .js-navi-mail': 'backToIndex'
     'click .js-navi-help': 'backToIndex'
-    'click .js-navi-conf': 'backToIndex'
+    'click .js-navi-conf': 'dialogConfig'
     'click .js-navi-logout': 'dialogLogout'
     'submit .js-navi-search': 'submitSearch'
 
@@ -500,6 +514,23 @@ class AccountView extends Backbone.View
 
   backToIndex: ->
     $app.navigate '/', yes
+
+  dialogConfig: ->
+    ui.config
+      'Safe search filter':
+        id: 'js-safe-search-filter'
+        type: 'checkbox'
+        value: media.query.filter is 'safe'
+    ,
+      accept: ->
+        if ($ '#js-safe-search-filter').prop('checked')
+          media.query.filter = 'safe'
+        else
+          media.query.filter = 'none'
+        media.accountView.changetab media.accountView.pretab
+        $app.refresh()
+      cancel: ->
+        media.accountView.changetab media.accountView.pretab
 
   dialogLogout: ->
     ui.dialog 'Are you sure you want to log out?',
@@ -618,7 +649,7 @@ media =
     limit: storage.get('limit') || 25
     skip: 0
     sort: storage.get('sort') || '-time'
-    filter: storage.get('filter') || 'none'
+    filter: storage.get('filter') || 'safe'
 
 $app = new Application()
 

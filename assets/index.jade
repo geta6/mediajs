@@ -23,7 +23,13 @@ html
           button.ui-dialog-button.btn.btn-sm.btn-default Cancel
           button.ui-dialog-button.btn.btn-sm.btn-primary OK
 
-    #ui-config.ui-config.ui-config-opaque: table: tr: td
+    #ui-config.ui-dialog.ui-dialog-opaque: table: tr: td
+      .ui-dialog-container
+        input.ui-dialog-keydriver
+        .ui-dialog-message: table
+        .ui-dialog-control
+          button.ui-dialog-button.btn.btn-sm.btn-default Cancel
+          button.ui-dialog-button.btn.btn-sm.btn-primary OK
 
     script#tmpl-account(type='text/template')
       <% if (callback) { %>
