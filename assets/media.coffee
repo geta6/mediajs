@@ -12,21 +12,22 @@ $doc = $ document
 # ===================================
 
 $api =
+  domain: '//api.geta6.net'
   account: ->
-    return $.ajax '//api.geta6.net/account/me.json',
+    return $.ajax "#{$api.domain}/account/me.json",
       type: 'GET'
       dataType: 'jsonp'
       beforeSend: ->
 
   search: (data = {}) ->
-    return $.ajax '//api.geta6.net/content/search.json',
+    return $.ajax "#{$api.domain}/content/search.json",
       type: 'GET'
       data: data
       dataType: 'jsonp'
       beforeSend: ->
 
   browse: (data = {}) ->
-    return $.ajax '//api.geta6.net/content/browse.json',
+    return $.ajax "#{$api.domain}/content/browse.json",
       type: 'GET'
       data: data
       dataType: 'jsonp'
@@ -34,7 +35,7 @@ $api =
 
   favorite: (id) ->
     throw new Error 'no id' unless id
-    return $.ajax '//api.geta6.net/account/fav/create.json',
+    return $.ajax "#{$api.domain}/account/fav/create.json",
       type: 'GET'
       data: id: id
       dataType: 'jsonp'
@@ -42,7 +43,7 @@ $api =
 
   unfavorite: (id) ->
     throw new Error 'no id' unless id
-    return $.ajax '//api.geta6.net/account/fav/delete.json',
+    return $.ajax "#{$api.domain}/account/fav/delete.json",
       type: 'GET'
       data: id: id
       dataType: 'jsonp'
@@ -320,12 +321,12 @@ class ContentView extends Backbone.View
       $.when($api.unfavorite @model.get 'id')
         .fail =>
           console.log 'fail'
-        .then =>
+        .done =>
           fav.splice (fav.indexOf media.account.get 'id'), 1
           @model.set { isfav: no, fav: fav }
     else
       $.when($api.favorite @model.get 'id')
-        .then =>
+        .done =>
           fav.unshift media.account.get 'id'
           @model.set { isfav: yes, fav: fav }
 
@@ -576,7 +577,7 @@ class Application extends Backbone.Router
 
   initialize: ->
     $.when($api.account())
-      .then (user) =>
+      .done (user) =>
         media.auth = yes
         Backbone.history.start pushState: on
         @navigate location.pathname, yes
@@ -585,6 +586,7 @@ class Application extends Backbone.Router
           media.accountView = new AccountView model: media.account
           media.contentsView = new ContentsView media.contents
       .fail (err) =>
+        console.debug err, err.readyState, err.status, err.statusText
         media.auth = no
         Backbone.history.start pushState: on
         @navigate '/login', yes
@@ -604,7 +606,7 @@ class Application extends Backbone.Router
       @fetching = yes
       ui.progress on
       $.when($api[@current] query)
-        .then (browse) =>
+        .done (browse) =>
           media.contents.inspectData browse
           for result in browse.results
             media.contents.add new Content result
