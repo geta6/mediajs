@@ -156,6 +156,35 @@ ui =
       ui._scrollto = visible
       ($ '.ui-scrollto').stop().fadeOut ui.animationTime
 
+  _moveto: no
+
+  moveto: (movedown = yes) ->
+    if movedown and !ui._moveto
+      ui._moveto = yes
+      $focus = ($ '.ui-focus').next()
+      $focus = $ 'div[data-index=0]' unless $focus.size()
+      $all.stop().animate
+        scrollTop: $focus.attr 'data-offset'
+      , (ui.animationTime / 2), -> ui._moveto = no
+    if !movedown and !ui._moveto
+      ui._moveto = yes
+      $focus = ($ '.ui-focus').prev()
+      $focus = $ 'div[data-index=0]' unless $focus.size()
+      $all.stop().animate
+        scrollTop: $focus.attr 'data-offset'
+      , (ui.animationTime / 2), -> ui._moveto = no
+
+  searchFocus: ->
+    unless ui._moveto
+      ui._moveto = yes
+      $all.stop().animate scrollTop: 0, (ui.animationTime / 2), ->
+        ($ '.js-navi-search input').focus()
+        ui._moveto = no
+
+  focus: ($el = null) ->
+    ($ ".ui-focus").removeClass 'ui-focus'
+    $el.addClass 'ui-focus' if $el isnt null
+
   bookPrev: ->
     $img = $ '.item-body-player-image'
     src = $img.attr 'data-src'
@@ -180,13 +209,11 @@ ui =
 
   slideFade: ($el, makeVisible = no, callback = ->) ->
     if makeVisible
-      $el
-        .stop()
+      $el.stop()
         .animate(opacity: 1, {duration: ui.animationTime, queue: no})
         .slideDown ui.animationTime, callback
     else
-      $el
-        .stop()
+      $el.stop()
         .animate(opacity: 0, {duration: ui.animationTime, queue: no})
         .slideUp ui.animationTime, callback
 
@@ -235,32 +262,6 @@ ui =
         when '.js-item-order-time-dsc' then '-time'
         when '.js-item-order-name-asc' then '+name'
         when '.js-item-order-name-dsc' then '-name'
-
-  _moveto: no
-
-  moveto: (movedown = yes) ->
-    if movedown and !ui._moveto
-      ui._moveto = yes
-      $all.stop().animate
-        scrollTop: ($ '.ui-focus').attr 'data-offset'
-      , (ui.animationTime / 2), -> ui._moveto = no
-    if !movedown and !ui._moveto
-      ui._moveto = yes
-      $all.stop().animate
-        scrollTop: ($ '.ui-focus').prev().prev().attr 'data-offset'
-      , (ui.animationTime / 2), -> ui._moveto = no
-
-  searchFocus: ->
-    unless ui._moveto
-      ui._moveto = yes
-      $all.stop().animate scrollTop: 0, (ui.animationTime / 2), ->
-        ($ '.js-navi-search input').focus()
-        ui._moveto = no
-
-  focus: ($el = null) ->
-    ($ ".ui-focus").removeClass 'ui-focus'
-    $el.addClass 'ui-focus' if $el isnt null
-
 
 # ===================================
 # LocalStorage
@@ -500,7 +501,6 @@ class ContentsView extends Backbone.View
     view = new ContentView(model: content).render()
     (@$ '.item-main').append view.el
     view.$el.attr 'data-offset', view.$el.offset().top
-    $win.trigger 'scroll'
 
   navigateTargetSeries: ->
     $app.navigate "/browse/#{@collection.inspect.target.parent}", yes
@@ -710,8 +710,6 @@ class Application extends Backbone.Router
     if name is null
       name = media.account.get 'id'
 
-    console.log 'account', name, act
-
   index: ->
     @search ''
 
@@ -731,9 +729,6 @@ media =
 
 $app = new Application()
 
-status =
-  moving: no
-
 $win.on 'resize scroll', (event) ->
   winheight = $win.height()
   docheight = $doc.height()
@@ -744,26 +739,35 @@ $win.on 'resize scroll', (event) ->
 
   ui.scrollto window.scrollY > 640
 
-  for el in  $ '.item' when $el = $ el
-    index = $el.attr 'data-index'
-    offset = $el.attr 'data-offset'
-    if offset > window.scrollY + 20
+  for el, i in $ '.item'
+    $el = $ el
+    [index, offset] = [$el.attr('data-index'), $el.attr('data-offset')]
+    if offset > window.scrollY - 20
+      console.log i, offset, window.scrollY - 20
       ui.focus $el
       break
+
+searchfocus = no
 
 $doc.on 'keyup', (event) ->
   switch event.keyCode
     when 70 # f
-      ui.searchFocus()
+      ui.searchFocus() unless searchfocus
 
 $doc.on 'keydown', (event) ->
   switch event.keyCode
     when 74 # j
-      ui.moveto yes
+      ui.moveto yes unless searchfocus
     when 75 # k
-      ui.moveto no
+      ui.moveto no unless searchfocus
     when 76 # l
       console.log 'l'
 
 $doc.on 'click', '.ui-scrollto', ->
   $all.animate scrollTop: 0
+
+$doc.on 'focus', '.js-navi-search input', ->
+  searchfocus = yes
+
+$doc.on 'blur', '.js-navi-search input', ->
+  searchfocus = no
