@@ -188,11 +188,11 @@ ui =
       model = media.contents.get (id = $focus.attr 'id')
       fav = model.get 'fav'
       me = media.account.get 'id'
-      $.when($api.favorite id)
-        .done =>
-          fav.splice(fav.indexOf(me), 1) if -1 < fav.indexOf me
-          fav.unshift media.account.get 'id'
-          model.set { isfav: yes, fav: fav }
+      if -1 is fav.indexOf me
+        $.when($api.favorite id)
+          .done =>
+            fav.unshift media.account.get 'id'
+            model.set { isfav: yes, fav: fav }
 
   searchFocus: ->
     unless ui._moveto
