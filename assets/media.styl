@@ -1,5 +1,68 @@
 @import 'nib'
 
+// .post_full .post_animated_heart {
+//     background-position: 0 -420px;
+//     -webkit-animation: like_poof .6s ease-out;
+//     -moz-animation: like_poof .6s ease-out;
+//     -ms-animation: like_poof .6s ease-out;
+//     -o-animation: like_poof .6s ease-out;
+//     animation: like_poof .6s ease-out
+// }
+
+// .post_full .post_animated_heart span {
+//     display: none
+// }
+
+// .post_full .post_animated_heart.unliked {
+//     background: transparent;
+//     -webkit-animation: none;
+//     -moz-animation: none;
+//     -ms-animation: none;
+//     -o-animation: none;
+//     animation: none
+// }
+
+// .post_full .post_animated_heart.unliked span {
+//     background: url('/images/dashboard_master_sprite.png?b4c2cb49f058f8b0c7af19a2917d5075') no-repeat;
+//     display: block;
+//     height: 100%;
+//     left: 50%;
+//     margin-left: 3px;
+//     position: absolute;
+//     top: 0
+// }
+
+// .post_full .post_animated_heart.unliked span.heart_left {
+//     background-position: 0 -360px;
+//     margin-left: -29px;
+//     width: 26px;
+//     -webkit-transform-origin: 26px 54px;
+//     -moz-transform-origin: 26px 54px;
+//     -ms-transform-origin: 26px 54px;
+//     -o-transform-origin: 26px 54px;
+//     transform-origin: 26px 54px;
+//     -webkit-animation: unlike_heartbreak_left .6s ease-out;
+//     -moz-animation: unlike_heartbreak_left .6s ease-out;
+//     -ms-animation: unlike_heartbreak_left .6s ease-out;
+//     -o-animation: unlike_heartbreak_left .6s ease-out;
+//     animation: unlike_heartbreak_left .6s ease-out
+// }
+
+// .post_full .post_animated_heart.unliked span.heart_right {
+//     background-position: -29px -360px;
+//     width: 29px;
+//     -webkit-transform-origin: 0 54px;
+//     -moz-transform-origin: 0 54px;
+//     -ms-transform-origin: 0 54px;
+//     -o-transform-origin: 0 54px;
+//     transform-origin: 0 54px;
+//     -webkit-animation: unlike_heartbreak_right .6s ease-out;
+//     -moz-animation: unlike_heartbreak_right .6s ease-out;
+//     -ms-animation: unlike_heartbreak_right .6s ease-out;
+//     -o-animation: unlike_heartbreak_right .6s ease-out;
+//     animation: unlike_heartbreak_right .6s ease-out
+// }
+
 @keyframes stripes
   from
     background-position: 40px 0
@@ -168,11 +231,28 @@ a
     background #F3F3F3
     border-radius 3px
   .ui-dialog-message
-    padding-bottom 10px
+    padding 10px 0 25px 0
     color #444
   .ui-dialog-button
     margin 0 2%
     width 40%
+
+.ui-scrollto
+  display none
+  position fixed
+  top 20px
+  right 20px
+  width 50px
+  height 50px
+  color $color_bg
+  background $color_br_light
+  border-radius 6px
+  text-align center
+  line-height 50px
+  font-size 24px
+  &:hover
+    cursor pointer
+    background $color_br_sneak
 
 .ui-colored
   &.glyphicon-heart
@@ -458,6 +538,9 @@ a
                   border-radius 6px 6px 0 0
                 &:hover
                   background-color #F5F5F5
+                .glyphicon
+                  width 28px
+                  margin-left -28px
             &:after
               content ' '
               position absolute
@@ -503,9 +586,6 @@ a
 
     table
       margin-bottom 21px
-
-    // tr:last-child td
-    //   border-bottom none
 
     .item-side-entry
       padding 0 5px

@@ -6,6 +6,7 @@
 
 $win = $ window
 $doc = $ document
+$all = $ 'html, body'
 
 # ===================================
 # API
@@ -17,21 +18,32 @@ $api =
     return $.ajax "#{$api.domain}/account/me.json",
       type: 'GET'
       dataType: 'jsonp'
-      beforeSend: ->
 
   search: (data = {}) ->
     return $.ajax "#{$api.domain}/content/search.json",
       type: 'GET'
       data: data
       dataType: 'jsonp'
-      beforeSend: ->
 
   browse: (data = {}) ->
     return $.ajax "#{$api.domain}/content/browse.json",
       type: 'GET'
       data: data
       dataType: 'jsonp'
-      beforeSend: ->
+
+  browseView: (id, data) ->
+    throw new Error 'no id' unless id
+    return $.ajax "#{$api.domain}/account/view.json",
+      type: 'GET'
+      data: _.extend data, id: id
+      dataType: 'jsonp'
+
+  browseFav: (id, data) ->
+    throw new Error 'no id' unless id
+    return $.ajax "#{$api.domain}/account/fav.json",
+      type: 'GET'
+      data: _.extend data, id: id
+      dataType: 'jsonp'
 
   favorite: (id) ->
     throw new Error 'no id' unless id
@@ -39,7 +51,6 @@ $api =
       type: 'GET'
       data: id: id
       dataType: 'jsonp'
-      beforeSend: ->
 
   unfavorite: (id) ->
     throw new Error 'no id' unless id
@@ -47,7 +58,6 @@ $api =
       type: 'GET'
       data: id: id
       dataType: 'jsonp'
-      beforeSend: ->
 
 # ===================================
 # UI
@@ -136,6 +146,16 @@ ui =
       , ui.animationTime, ->
         $progress.removeClass 'ui-progress-active'
 
+  _scrollto: no
+
+  scrollto: (visible = no) ->
+    if visible and !ui._scrollto
+      ui._scrollto = visible
+      ($ '.ui-scrollto').stop().fadeIn ui.animationTime
+    if !visible and ui._scrollto
+      ui._scrollto = visible
+      ($ '.ui-scrollto').stop().fadeOut ui.animationTime
+
   bookPrev: ->
     $img = $ '.item-body-player-image'
     src = $img.attr 'data-src'
@@ -216,6 +236,31 @@ ui =
         when '.js-item-order-name-asc' then '+name'
         when '.js-item-order-name-dsc' then '-name'
 
+  _moveto: no
+
+  moveto: (movedown = yes) ->
+    if movedown and !ui._moveto
+      ui._moveto = yes
+      $all.stop().animate
+        scrollTop: ($ '.ui-focus').attr 'data-offset'
+      , (ui.animationTime / 2), -> ui._moveto = no
+    if !movedown and !ui._moveto
+      ui._moveto = yes
+      $all.stop().animate
+        scrollTop: ($ '.ui-focus').prev().prev().attr 'data-offset'
+      , (ui.animationTime / 2), -> ui._moveto = no
+
+  searchFocus: ->
+    unless ui._moveto
+      ui._moveto = yes
+      $all.stop().animate scrollTop: 0, (ui.animationTime / 2), ->
+        ($ '.js-navi-search input').focus()
+        ui._moveto = no
+
+  focus: ($el = null) ->
+    ($ ".ui-focus").removeClass 'ui-focus'
+    $el.addClass 'ui-focus' if $el isnt null
+
 
 # ===================================
 # LocalStorage
@@ -258,7 +303,9 @@ class ContentView extends Backbone.View
 
   initialize: ->
     @listenTo @model, 'change', @render
-    @$el.addClass 'item'
+    @$el.addClass('item')
+      .attr('id', @model.get 'id')
+      .attr('data-index', media.index++)
 
     unless @model.get 'player'
       return @$el.html @template @model.toJSON()
@@ -300,12 +347,14 @@ class ContentView extends Backbone.View
     if 0 < fav.length
       for fav in _.uniq @model.get 'fav'
         notes.append ($ '<div>')
-          .addClass('item-body-footer-notes-note').text("liked this")
+          .addClass('item-body-footer-notes-note')
+          .text("liked this").attr('data-user', fav)
           .css 'background-image', "url(//api.geta6.net/account/icon?id=#{fav})"
     if 0 < view.length
       notes.append ($ '<div>')
         .addClass('item-body-footer-notes-note')
-        .text "#{view.length} view#{if 1 < view.length then 's' else ''}"
+        .text("#{view.length} view#{if 1 < view.length then 's' else ''}")
+        .prepend ($ '<div>').addClass 'glyphicon glyphicon-eye-open'
     return @
 
   viewContent: (event) ->
@@ -450,6 +499,8 @@ class ContentsView extends Backbone.View
   append: (content) ->
     view = new ContentView(model: content).render()
     (@$ '.item-main').append view.el
+    view.$el.attr 'data-offset', view.$el.offset().top
+    $win.trigger 'scroll'
 
   navigateTargetSeries: ->
     $app.navigate "/browse/#{@collection.inspect.target.parent}", yes
@@ -571,6 +622,7 @@ class Application extends Backbone.Router
   routes:
     'search(/*path)': 'search'
     'browse(/*path)': 'browse'
+    'user(/:user/:action)': 'account'
     'login': 'login'
     'logout': 'logout'
     '': 'index'
@@ -579,20 +631,20 @@ class Application extends Backbone.Router
     $.when($api.account())
       .done (user) =>
         media.auth = yes
-        Backbone.history.start pushState: on
         @navigate location.pathname, yes
         media.account.set user
+        Backbone.history.start pushState: on
         $ =>
           media.accountView = new AccountView model: media.account
           media.contentsView = new ContentsView media.contents
       .fail (err) =>
         console.debug err, err.readyState, err.status, err.statusText
         media.auth = no
-        Backbone.history.start pushState: on
         @navigate '/login', yes
         callback = "#{location.protocol}//#{location.hostname}"
         callback = "#{callback}:#{location.port}" if location.port isnt 80
         media.account.set 'callback', callback
+        Backbone.history.start pushState: on
         $ =>
           media.accountView = new AccountView model: media.account
           media.contentsView = new ContentsView media.contents
@@ -638,6 +690,7 @@ class Application extends Backbone.Router
 
   browse: (path) ->
     @current = 'browse'
+    media.index = 0
     media.query.q = path
     media.contents.reset()
     @fetch media.query, ->
@@ -645,12 +698,19 @@ class Application extends Backbone.Router
 
   search: (path) ->
     @current = 'search'
+    media.index = 0
     media.query.q = path
     media.query.path = ''
     media.contents.reset()
     @fetch media.query, ->
       ($ '.js-navi-search input').val path
       media.accountView.changetab 'home'
+
+  account: (name, act = 'fav') ->
+    if name is null
+      name = media.account.get 'id'
+
+    console.log 'account', name, act
 
   index: ->
     @search ''
@@ -660,6 +720,8 @@ media =
   contents: new Contents
   accountView: null
   contentsView: null
+  index: 0
+  focus: 0
   query:
     type: 'f'
     limit: storage.get('limit') || 25
@@ -669,6 +731,9 @@ media =
 
 $app = new Application()
 
+status =
+  moving: no
+
 $win.on 'resize scroll', (event) ->
   winheight = $win.height()
   docheight = $doc.height()
@@ -676,3 +741,29 @@ $win.on 'resize scroll', (event) ->
     $app.loadNext()
   if media.contentsView
     media.contentsView.sidebarSticky winheight, docheight
+
+  ui.scrollto window.scrollY > 640
+
+  for el in  $ '.item' when $el = $ el
+    index = $el.attr 'data-index'
+    offset = $el.attr 'data-offset'
+    if offset > window.scrollY + 20
+      ui.focus $el
+      break
+
+$doc.on 'keyup', (event) ->
+  switch event.keyCode
+    when 70 # f
+      ui.searchFocus()
+
+$doc.on 'keydown', (event) ->
+  switch event.keyCode
+    when 74 # j
+      ui.moveto yes
+    when 75 # k
+      ui.moveto no
+    when 76 # l
+      console.log 'l'
+
+$doc.on 'click', '.ui-scrollto', ->
+  $all.animate scrollTop: 0
