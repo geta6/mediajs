@@ -1,7 +1,6 @@
 fs = require 'fs'
 url = require 'url'
 path = require 'path'
-{exec} = require 'child_process'
 
 PORT = 3000
 MODE = 'dist'
@@ -47,9 +46,6 @@ while arg = args.shift()
       process.exit 1
 
 index = path.resolve MODE, INDEX
-
-#exec 'git log --oneline', (err, stdout) ->
-#  hash = stdout.trim().split(' ').shift()
 
 module.exports = (grunt) ->
   grunt.initConfig
