@@ -162,17 +162,21 @@ ui =
     if movedown and !ui._moveto
       ui._moveto = yes
       $focus = ($ '.ui-focus').next()
-      $focus = $ 'div[data-index=0]' unless $focus.size()
-      $all.stop().animate
-        scrollTop: $focus.attr 'data-offset'
-      , (ui.animationTime / 2), -> ui._moveto = no
+      unless $focus.size()
+        scrollTo = parseInt ($ 'div[data-index=0]').attr 'data-offset'
+      else
+        scrollTo = parseInt $focus.attr 'data-offset'
+      $all.stop().animate scrollTop: scrollTo-10, (ui.animationTime / 2), ->
+        ui._moveto = no
     if !movedown and !ui._moveto
       ui._moveto = yes
       $focus = ($ '.ui-focus').prev()
-      $focus = $ 'div[data-index=0]' unless $focus.size()
-      $all.stop().animate
-        scrollTop: $focus.attr 'data-offset'
-      , (ui.animationTime / 2), -> ui._moveto = no
+      unless $focus.size()
+        scrollTo = 0
+      else
+        scrollTo = parseInt $focus.attr 'data-offset'
+      $all.stop().animate scrollTop: scrollTo-10, (ui.animationTime / 2), ->
+        ui._moveto = no
 
   searchFocus: ->
     unless ui._moveto
@@ -314,7 +318,6 @@ class ContentView extends Backbone.View
     @$el.html @template _.extend @model.toJSON(), player: yes
 
     (@$ '.item-body-player-media').one 'load play', (event) =>
-      console.log event.type
       @viewContent event
 
     if '.pdf' is @model.get 'type'
@@ -369,8 +372,6 @@ class ContentView extends Backbone.View
     (@$ '.js-item-body-footer-action-fav').toggleClass 'ui-colored'
     if @model.get 'isfav'
       $.when($api.unfavorite @model.get 'id')
-        .fail =>
-          console.log 'fail'
         .done =>
           fav.splice (fav.indexOf media.account.get 'id'), 1
           @model.set { isfav: no, fav: fav }
@@ -638,7 +639,6 @@ class Application extends Backbone.Router
           media.accountView = new AccountView model: media.account
           media.contentsView = new ContentsView media.contents
       .fail (err) =>
-        console.debug err, err.readyState, err.status, err.statusText
         media.auth = no
         @navigate '/login', yes
         callback = "#{location.protocol}//#{location.hostname}"
@@ -736,16 +736,16 @@ $win.on 'resize scroll', (event) ->
     $app.loadNext()
   if media.contentsView
     media.contentsView.sidebarSticky winheight, docheight
-
   ui.scrollto window.scrollY > 640
-
-  for el, i in $ '.item'
-    $el = $ el
-    [index, offset] = [$el.attr('data-index'), $el.attr('data-offset')]
-    if offset > window.scrollY - 20
-      console.log i, offset, window.scrollY - 20
-      ui.focus $el
-      break
+  unless 72 < window.scrollY
+    ui.focus()
+  else
+    for el, i in $ '.item'
+      $el = $ el
+      [index, offset] = [$el.attr('data-index'), $el.attr('data-offset')]
+      if offset > window.scrollY - 20
+        ui.focus $el
+        break
 
 searchfocus = no
 
@@ -760,8 +760,8 @@ $doc.on 'keydown', (event) ->
       ui.moveto yes unless searchfocus
     when 75 # k
       ui.moveto no unless searchfocus
-    when 76 # l
-      console.log 'l'
+    # when 76 # l
+    #   console.log 'l'
 
 $doc.on 'click', '.ui-scrollto', ->
   $all.animate scrollTop: 0
