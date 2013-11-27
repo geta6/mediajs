@@ -1,67 +1,5 @@
 @import 'nib'
 
-// .post_full .post_animated_heart {
-//     background-position: 0 -420px;
-//     -webkit-animation: like_poof .6s ease-out;
-//     -moz-animation: like_poof .6s ease-out;
-//     -ms-animation: like_poof .6s ease-out;
-//     -o-animation: like_poof .6s ease-out;
-//     animation: like_poof .6s ease-out
-// }
-
-// .post_full .post_animated_heart span {
-//     display: none
-// }
-
-// .post_full .post_animated_heart.unliked {
-//     background: transparent;
-//     -webkit-animation: none;
-//     -moz-animation: none;
-//     -ms-animation: none;
-//     -o-animation: none;
-//     animation: none
-// }
-
-// .post_full .post_animated_heart.unliked span {
-//     background: url('/images/dashboard_master_sprite.png?b4c2cb49f058f8b0c7af19a2917d5075') no-repeat;
-//     display: block;
-//     height: 100%;
-//     left: 50%;
-//     margin-left: 3px;
-//     position: absolute;
-//     top: 0
-// }
-
-// .post_full .post_animated_heart.unliked span.heart_left {
-//     background-position: 0 -360px;
-//     margin-left: -29px;
-//     width: 26px;
-//     -webkit-transform-origin: 26px 54px;
-//     -moz-transform-origin: 26px 54px;
-//     -ms-transform-origin: 26px 54px;
-//     -o-transform-origin: 26px 54px;
-//     transform-origin: 26px 54px;
-//     -webkit-animation: unlike_heartbreak_left .6s ease-out;
-//     -moz-animation: unlike_heartbreak_left .6s ease-out;
-//     -ms-animation: unlike_heartbreak_left .6s ease-out;
-//     -o-animation: unlike_heartbreak_left .6s ease-out;
-//     animation: unlike_heartbreak_left .6s ease-out
-// }
-
-// .post_full .post_animated_heart.unliked span.heart_right {
-//     background-position: -29px -360px;
-//     width: 29px;
-//     -webkit-transform-origin: 0 54px;
-//     -moz-transform-origin: 0 54px;
-//     -ms-transform-origin: 0 54px;
-//     -o-transform-origin: 0 54px;
-//     transform-origin: 0 54px;
-//     -webkit-animation: unlike_heartbreak_right .6s ease-out;
-//     -moz-animation: unlike_heartbreak_right .6s ease-out;
-//     -ms-animation: unlike_heartbreak_right .6s ease-out;
-//     -o-animation: unlike_heartbreak_right .6s ease-out;
-//     animation: unlike_heartbreak_right .6s ease-out
-// }
 
 @keyframes stripes
   from
@@ -76,6 +14,17 @@
     transform rotate(180deg)
   100%
     transform rotate(360deg)
+
+@keyframes poof
+  0%
+    transform rotate(0deg)
+  25%
+    transform rotate(-20deg)
+  75%
+    transform rotate(20deg)
+  100%
+    transform rotate(0deg)
+
 
 global-reset()
 
@@ -253,6 +202,14 @@ a
   &:hover
     cursor pointer
     background $color_br_sneak
+
+.ui-animated-heart
+  position absolute
+  bottom 20px
+  animation poof .6s ease-out
+  .glyphicon-heart
+    color #D32B2B
+    font-size 60px
 
 .ui-colored
   &.glyphicon-heart

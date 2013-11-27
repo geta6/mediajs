@@ -178,6 +178,22 @@ ui =
       $all.stop().animate scrollTop: scrollTo-10, (ui.animationTime / 2), ->
         ui._moveto = no
 
+  liketo: ->
+    if ($focus = ($ '.ui-focus')).size()
+      $heart = ($ '<div>')
+        .addClass('ui-animated-heart')
+        .append ($ '<div>').addClass 'glyphicon glyphicon-heart'
+      $focus.append $heart.css left: "#{_.random 0, $focus.width() - $heart.width()}px"
+      $heart.animate { bottom: '100px', opacity: 0 }, 600, -> $heart.remove()
+      model = media.contents.get (id = $focus.attr 'id')
+      fav = model.get 'fav'
+      me = media.account.get 'id'
+      $.when($api.favorite id)
+        .done =>
+          fav.splice(fav.indexOf(me), 1) if -1 < fav.indexOf me
+          fav.unshift media.account.get 'id'
+          model.set { isfav: yes, fav: fav }
+
   searchFocus: ->
     unless ui._moveto
       ui._moveto = yes
@@ -760,8 +776,8 @@ $doc.on 'keydown', (event) ->
       ui.moveto yes unless searchfocus
     when 75 # k
       ui.moveto no unless searchfocus
-    # when 76 # l
-    #   console.log 'l'
+    when 76 # l
+      ui.liketo()
 
 $doc.on 'click', '.ui-scrollto', ->
   $all.animate scrollTop: 0
