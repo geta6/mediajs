@@ -132,7 +132,7 @@ html
                 tr: th.item-side-entry VERSION
                 tr: td.item-side-entry
                   .pull-left: a(href='//github.com/geta6/mediajs') mediajs
-                  .pull-right= version
+                  .pull-right: a(href='//github.com/geta6/mediajs/commit/#{hash}')= version
 
     script#tmpl-content(type='text/template')
       .item-icon(style!='background-image:url(//api.geta6.net/content/thumb?id=<%- id %>)')

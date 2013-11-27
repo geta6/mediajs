@@ -1,6 +1,7 @@
 fs = require 'fs'
 url = require 'url'
 path = require 'path'
+{exec} = require 'child_process'
 
 PORT = 3000
 MODE = 'dist'
@@ -47,10 +48,14 @@ while arg = args.shift()
 
 index = path.resolve MODE, INDEX
 
+#exec 'git log --oneline', (err, stdout) ->
+#  hash = stdout.trim().split(' ').shift()
+
 module.exports = (grunt) ->
   grunt.initConfig
 
     pkg: grunt.file.readJSON 'package.json'
+    hash: fs.readFileSync('.git/FETCH_HEAD', 'utf-8').trim().split(' ').shift().slice(0, 7)
 
     coffee:
       options:
@@ -80,7 +85,9 @@ module.exports = (grunt) ->
       debug:
         options:
           pretty: yes
-          data: version: '<%- pkg.version %>'
+          data:
+            hash: '<%- hash %>'
+            version: '<%- pkg.version %>'
         files: [{
           expand: yes
           cwd: 'assets/'
@@ -90,7 +97,9 @@ module.exports = (grunt) ->
         }]
       release:
         options:
-          data: version: '<%- pkg.version %>'
+          data:
+            hash: '<%- hash %>'
+            version: '<%- pkg.version %>'
         files: [{
           expand: yes
           cwd: 'assets/'
