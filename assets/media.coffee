@@ -45,6 +45,13 @@ $api =
       data: _.extend data, id: id
       dataType: 'jsonp'
 
+  view: (id) ->
+    throw new Error 'no id' unless id
+    return $.ajax "#{$api.domain}/account/view/create.json",
+      type: 'GET'
+      data: id: id
+      dataType: 'jsonp'
+
   favorite: (id) ->
     throw new Error 'no id' unless id
     return $.ajax "#{$api.domain}/account/fav/create.json",
@@ -382,6 +389,7 @@ class ContentView extends Backbone.View
     view.push media.account.get 'id'
     @model.set 'view', view
     @model.trigger 'change'
+    $.when($api.view()).done ->
 
   favContent: ->
     fav = @model.get 'fav'
