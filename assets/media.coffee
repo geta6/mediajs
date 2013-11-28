@@ -389,7 +389,7 @@ class ContentView extends Backbone.View
     view.push media.account.get 'id'
     @model.set 'view', view
     @model.trigger 'change'
-    $.when($api.view()).done ->
+    $.when($api.view(@model.get 'id')).done ->
 
   favContent: ->
     fav = @model.get 'fav'
