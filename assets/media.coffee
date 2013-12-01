@@ -772,7 +772,7 @@ $app = new Application()
 $win.on 'resize scroll', (event) ->
   winheight = $win.height()
   docheight = $doc.height()
-  if docheight < window.scrollY + winheight + 200
+  if docheight < window.scrollY + winheight + 600
     $app.loadNext()
   if media.contentsView
     media.contentsView.sidebarSticky winheight, docheight
@@ -797,6 +797,7 @@ $doc.on 'keyup', (event) ->
 $doc.on 'keydown', (event) ->
   switch event.keyCode
     when 74 # j
+      console.log 'j'
       ui.moveto yes unless searchfocus
     when 75 # k
       ui.moveto no unless searchfocus
