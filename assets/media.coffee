@@ -45,13 +45,6 @@ $api =
       data: _.extend data, id: id
       dataType: 'jsonp'
 
-  view: (id) ->
-    throw new Error 'no id' unless id
-    return $.ajax "#{$api.domain}/account/view/create.json",
-      type: 'GET'
-      data: id: id
-      dataType: 'jsonp'
-
   favorite: (id) ->
     throw new Error 'no id' unless id
     return $.ajax "#{$api.domain}/account/fav/create.json",
@@ -322,6 +315,7 @@ class ContentView extends Backbone.View
   events:
     # 'load .item-body-player-media': 'viewContent'
     # 'play .item-body-player-media': 'viewContent'
+    'click .js-item-body-footer-action-dwn': 'dwnContent'
     'click .js-item-body-footer-action-fav': 'favContent'
     'click .item-icon': 'navigateBrowseFile'
     'click .item-body-header-title': 'navigateBrowseFile'
@@ -389,7 +383,10 @@ class ContentView extends Backbone.View
     view.push media.account.get 'id'
     @model.set 'view', view
     @model.trigger 'change'
-    $.when($api.view(@model.get 'id')).done ->
+
+  dwnContent: ->
+    win = window.open "//api.geta6.net/content/media?id=#{@model.get 'id'}", '_blank'
+    win.focus()
 
   favContent: ->
     fav = @model.get 'fav'
@@ -642,6 +639,11 @@ class AccountView extends Backbone.View
 
 class Application extends Backbone.Router
 
+  # el
+  $title: null
+  $search: null
+
+  # state
   fetching: no
 
   routes:
@@ -662,6 +664,8 @@ class Application extends Backbone.Router
         $ =>
           media.accountView = new AccountView model: media.account
           media.contentsView = new ContentsView media.contents
+          @$title = $ 'title'
+          @$search = $ '.js-navi-search input'
       .fail (err) =>
         media.auth = no
         @navigate '/login', yes
@@ -672,6 +676,8 @@ class Application extends Backbone.Router
         $ =>
           media.accountView = new AccountView model: media.account
           media.contentsView = new ContentsView media.contents
+          @$title = $ 'title'
+          @$search = $ '.js-navi-search input'
 
   refresh: ->
     Backbone.history.stop()
@@ -682,17 +688,17 @@ class Application extends Backbone.Router
       @fetching = yes
       ui.progress on
       $.when($api[@current] query)
-        .done (browse) =>
-          media.contents.inspectData browse
-          for result in browse.results
+        .done (data) =>
+          media.contents.inspectData data
+          for result in data.results
             media.contents.add new Content result
           ui.progress off
           @fetching = no
-          done() if typeof done is 'function'
+          return done null, data
         .fail (err) =>
           ui.progress off
           @fetching = no
-          done() if typeof done is 'function'
+          return done err, null
 
   loadNext: ->
     if media.contents.inspect?.query_next? and !@fetching and $api[@current]?
@@ -717,8 +723,14 @@ class Application extends Backbone.Router
     media.index = 0
     media.query.q = path
     media.contents.reset()
-    @fetch media.query, ->
+    @fetch media.query, (err, browse) =>
+      console.log browse.target.details
       media.accountView.changetab 'home'
+      @$search.blur()
+      if path
+        @$title.html "#{browse.target.details.title} - getumblr."
+      else
+        @$title.html "getumblr."
 
   search: (path) ->
     @current = 'search'
@@ -726,9 +738,13 @@ class Application extends Backbone.Router
     media.query.q = path
     media.query.path = ''
     media.contents.reset()
-    @fetch media.query, ->
-      ($ '.js-navi-search input').val path
+    @fetch media.query, (err, search) =>
       media.accountView.changetab 'home'
+      @$search.val(path).blur()
+      if path
+        @$title.html "#{path} - getumblr. (#{search.match})"
+      else
+        @$title.html "getumblr."
 
   account: (name, act = 'fav') ->
     if name is null
