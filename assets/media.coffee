@@ -724,7 +724,6 @@ class Application extends Backbone.Router
     media.query.q = path
     media.contents.reset()
     @fetch media.query, (err, browse) =>
-      console.log browse.target.details
       media.accountView.changetab 'home'
       @$search.blur()
       if path
@@ -797,7 +796,6 @@ $doc.on 'keyup', (event) ->
 $doc.on 'keydown', (event) ->
   switch event.keyCode
     when 74 # j
-      console.log 'j'
       ui.moveto yes unless searchfocus
     when 75 # k
       ui.moveto no unless searchfocus

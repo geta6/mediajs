@@ -36,11 +36,9 @@ html
           button.ui-dialog-button.btn.btn-sm.btn-default Cancel
           button.ui-dialog-button.btn.btn-sm.btn-primary OK
 
-    .ui-spacer
-
     script#tmpl-account(type='text/template')
       <% if (callback) { %>
-      .ui-dialog.ui-dialog-lock(style='visibility:visible;background-image:url(//mogashi.no-ip.org/alice)')
+      .ui-dialog.ui-dialog-lock(style='visibility:visible;background-image:url(//api.geta6.net/content/alice)')
         table#auth: tr: td
           form(method='POST', action='//api.geta6.net/session/create')
             h1 getumblr.
